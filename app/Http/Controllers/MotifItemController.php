@@ -23,17 +23,36 @@ class MotifItemController extends Controller
   }
 
   public function getListMotif(Request $request){
-    $listMotifTenuns = DB::table('motif_jenis_tenuns')->get();
+    $size = $request->input('size', 20);
+    $cursor = $request->input('cursor');
 
-    if(empty($listMotifTenuns))
+    $listMotifTenuns = DB::table('motif_tenuns')->skip($cursor)->take($size)->get();
+
+    if(!count($listMotifTenuns))
     return response()->json(array('success' => false,
       'message'=>'Get item failed, no item found',
       'data' => $motifItem),
       404);
 
+    if(count($listMotifTenuns) < 20){
+      $pagination = [
+          'is_exist_next' => false,
+        ];
+    }
+    else{
+      $cursor += $size;
+
+      $pagination = [
+          'is_exist_next' => true,
+          'next_cursor' => $cursor,
+          'size' => $size
+        ];
+      }
+
     return response()->json(array('error' => false,
       'message'=>'Get list item success',
-      'data' => $listMotifTenuns),
+      'data' => $listMotifTenuns,
+      'pagination' => $pagination),
       200);
   }
 
