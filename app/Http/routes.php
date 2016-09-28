@@ -29,7 +29,7 @@ $app->get('/status', function () use ($app) {
 $app->post('generateImg', 'ImageGeneratorController@generateImg');
 
 //route for tenun
-$app->post('tenun', 'TenunItemController@createNewTenunItem');
+$app->post('tenun', 'TenunItemController@createNewTenunItem');  
 $app->get('tenun', 'TenunItemController@getListTenun');
 $app->get('tenun/{id}', 'TenunItemController@view');
 
@@ -37,9 +37,5 @@ $app->get('tenun/{id}', 'TenunItemController@view');
 $app->post('motifTenun', 'MotifItemController@createNewMotifItem');
 $app->get('motifTenun', 'MotifItemController@getListMotif');
 $app->get('motifTenun/{id}', 'MotifItemController@view');
-
-//route for jenis_tenun
-$app->get('jenisTenun{id}', 'JenisTenunController@view');
-$app->get('jenisTenun', 'JenisTenunController@getListJenisTenun');
 
 $app->get('{path:.*}', 'CustomController@stuff');

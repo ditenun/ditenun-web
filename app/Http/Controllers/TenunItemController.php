@@ -50,11 +50,27 @@ class TenunItemController extends Controller
   }
 
   public function getListTenun(Request $request){
-    $listTenun = DB::table('tenuns')->get();
+
+    $size = $request->input('size', 20);
+    $cursor = $request->input('cursor');
+
+    $listTenun = DB::table('tenuns')->skip($cursor)->take($size)->get();
+
+    $cursor += $size;
+
+    if(count($listTenun)){
+      $pagination = [
+        'next_url' => $request->url() . '?' .http_build_query(compact('cursor', 'size'))
+      ];
+    } else {
+      $pagination = 'none';
+    }
+
 
     return response()->json(array('error' => false,
       'message'=>'Get list item success',
-      'data' => $listTenun),
+      'data' => $listTenun,
+      'pagination' => $pagination),
       200);
   }
 }

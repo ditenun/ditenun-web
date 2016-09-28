@@ -6,31 +6,42 @@ use Illuminate\Database\Seeder;
 class TenunTableSeeder extends Seeder{
   public function run(){
     Tenun::create([
-      'nama_tenun' => 'Bali',
+      'nama_tenun' => 'IDK Bali',
+      'deskripsi_tenun' => "Dari Bali",
+      'sejarah_tenun' => "its been a long timee...",
+      'kegunaan_tenun' => 'Syukuran',
+      'warna_dominan' => '#FFF000',
       'asal_tenun' => 'Bali',
+    ]);
+
+    Tenun::create([
+      'nama_tenun' => 'Ulos Balige',
+      'deskripsi_tenun' => "Dari Balige",
+      'sejarah_tenun' => "its been a long timee lae...",
+      'kegunaan_tenun' => 'Kematian',
+      'warna_dominan' => '#FFFF00',
+      'asal_tenun' => 'Sangkarnighuya',
+    ]);
+
+
+    Tenun::create([
+      'nama_tenun' => 'Sumatra Tenun',
+      'deskripsi_tenun' => "Dari Sumatra",
+      'sejarah_tenun' => "its been a long timasddee...",
+      'kegunaan_tenun' => 'Pernikahan',
+      'warna_dominan' => '#FFF000',
+      'asal_tenun' => 'Bali',
+    ]);
+
+
+    Tenun::create([
+      'nama_tenun' => 'Bali',
       'deskripsi_tenun' => "Dari Bali",
-      'sejarah_tenun' => "its been a long timee..."
+      'sejarah_tenun' => "its been a long timee...",
+      'kegunaan_tenun' => 'Syukuran',
+      'warna_dominan' => '#FFF500',
+      'asal_tenun' => 'Bali',
     ]);
 
-    Tenun::create([
-      'nama_tenun' => 'Sumatera',
-      'asal_tenun' => 'Balige',
-      'deskripsi_tenun' => "Dari Baliz",
-      'sejarah_tenun' => "its been a long timee..."
-    ]);
-
-    Tenun::create([
-      'nama_tenun' => 'Balian',
-      'asal_tenun' => 'Balia',
-      'deskripsi_tenun' => "Dari xBali",
-      'sejarah_tenun' => "its been a long timee..."
-    ]);
-
-    Tenun::create([
-      'nama_tenun' => 'Bali2',
-      'asal_tenun' => 'Bali1',
-      'deskripsi_tenun' => "Dari Bali",
-      'sejarah_tenun' => "its been a long timee..."
-    ]);
   }
 }

@@ -47,7 +47,7 @@ class Authenticate
       }
 
        return response()->json(array('error' => true,
-         'message'=>'Unauthorized ¯\_(ツ)_/¯ | pstt for now use this : $2y$10$9yZpxLswvbxjIGzdS2Z0U.cnam673/GY8PZvR.tiVRR6h7TndC9BK'),
+         'message'=>'Unauthorized ¯\_(ツ)_/¯ | pstt for now use this : $2y$10$YE4Qk14xkP6NeJNDkmiqDuSR0vWMApA/Ojl4Puf/JZ3Or0nXAz3J.'),
          401);
     }
 }

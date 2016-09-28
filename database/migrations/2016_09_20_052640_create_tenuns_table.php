@@ -18,9 +18,14 @@ class CreateTenunsTable extends Migration
 
           $table->increments('id_tenun');
           $table->string('nama_tenun', 75)->nullable()->default(NULL);
-          $table->string('asal_tenun', 75)->nullable()->default(NULL);
           $table->text('deskripsi_tenun')->nullable();
           $table->text('sejarah_tenun')->nullable();
+          $table->enum('kegunaan_tenun',
+                  ['Pernikahan', 'Kematian', 'Busana',
+                  'Syukuran', 'Penghargaan', 'Lainnya']);
+          $table->string('warna_dominan', 75)->nullable()->default(NULL);
+          $table->string('asal_tenun', 75)->nullable()->default(NULL);
+          $table->string('img_src', 75)->nullable()->default(NULL);
 
           $table->timestamps();
         });
