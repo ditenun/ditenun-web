@@ -8,7 +8,7 @@ use Illuminate\Support\Facades\DB;
 class MotifItemController extends Controller
 {
   public function view($id){
-    $motifItem = DB::table('motif_jenis_tenuns')->where('id_motif', $id)->first();
+    $motifItem = DB::table('motif_tenuns')->where('id', $id)->first();
 
     if(empty($motifItem))
     return response()->json(array('success' => false,
@@ -26,12 +26,15 @@ class MotifItemController extends Controller
     $size = $request->input('size', 20);
     $cursor = $request->input('cursor');
 
-    $listMotifTenuns = DB::table('motif_tenuns')->skip($cursor)->take($size)->get();
+    if($size == 'all')
+      $listMotifTenuns = DB::table('motif_tenuns')->get();
+    else
+      $listMotifTenuns = DB::table('motif_tenuns')->skip($cursor)->take($size)->get();
 
     if(!count($listMotifTenuns))
     return response()->json(array('success' => false,
       'message'=>'Get item failed, no item found',
-      'data' => $motifItem),
+      'data' => $listMotifTenuns),
       404);
 
     if(count($listMotifTenuns) < 20){
@@ -45,7 +48,7 @@ class MotifItemController extends Controller
       $pagination = [
           'is_exist_next' => true,
           'next_cursor' => $cursor,
-          'size' => $size
+          'size' => count($listMotifTenuns)
         ];
       }
 

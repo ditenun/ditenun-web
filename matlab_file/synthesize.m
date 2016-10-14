@@ -9,7 +9,7 @@ function [imout] = synthesize(imin, sizeout, tilesize, overlap ,  isdebug)
 %    
 %     IMGIN  
 %           the code both works on grascale images or color images
-%
+%x
 %     SIZEOUT
 %           An 1*2 array , the size of output image
 %           e.g.   size(texture)*3

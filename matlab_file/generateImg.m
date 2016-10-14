@@ -1,9 +1,8 @@
-function X = generateImg(newFileName)
+function X = generateImg(sourceFile, newFileName)
     pathStringImage = 'log_generated/';
     pathImage = '../public/img_temp/';
     pathSource = '../public/img_src/';
-    sourceFile = strcat(pathSource, 'potongansadum0.jpg');
-    stringImagePath = strcat(pathStringImage, newFileName, '.txt');
+    sourceFile = strcat(pathSource, sourceFile);
     newImagePath = strcat(pathImage, newFileName, '.jpg');
 
     generatedImg = imgQuilting(sourceFile, newImagePath);

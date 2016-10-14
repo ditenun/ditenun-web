@@ -27,9 +27,10 @@ $app->get('/status', function () use ($app) {
 
 //route for img generate
 $app->post('generateImg', 'ImageGeneratorController@generateImg');
+$app->post('generateImg2', 'ImageGeneratorController@generateImg2');
 
 //route for tenun
-$app->post('tenun', 'TenunItemController@createNewTenunItem');  
+$app->post('tenun', 'TenunItemController@createNewTenunItem');
 $app->get('tenun', 'TenunItemController@getListTenun');
 $app->get('tenun/{id}', 'TenunItemController@view');
 

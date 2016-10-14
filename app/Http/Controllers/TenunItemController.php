@@ -53,8 +53,10 @@ class TenunItemController extends Controller
     $size = $request->input('size', 20);
     $cursor = $request->input('cursor');
 
-    $listTenun = DB::table('tenuns')->skip($cursor)->take($size)->get();
-
+    if($size == 'all')
+      $listTenun = DB::table('tenuns')->get();
+    else
+      $listTenun = DB::table('tenuns')->skip($cursor)->take($size)->get();
 
     if(!count($listTenun))
       return response()->json(array('success' => false,
@@ -73,7 +75,7 @@ class TenunItemController extends Controller
       $pagination = [
         'is_exist_next' => true,
         'next_cursor' => $cursor,
-        'size' => $size
+        'size' => count($listTenun)
       ];
     }
 
