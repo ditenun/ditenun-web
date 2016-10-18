@@ -3,9 +3,11 @@
 require_once __DIR__.'/../vendor/autoload.php';
 
 try {
-    (new Dotenv\Dotenv(__DIR__.'/../'))->load();
+    (new Dotenv\Dotenv(__DIR__.'\..'))->load();
+  // Dotenv::load(__DIR__.'/../');
 } catch (Dotenv\Exception\InvalidPathException $e) {
     //
+    echo $e;
 }
 
 /*

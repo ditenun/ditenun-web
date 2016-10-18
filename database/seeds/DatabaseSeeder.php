@@ -13,10 +13,9 @@ class DatabaseSeeder extends Seeder
     {
       //comment after used
 
-      /*
+
         $this->call('AuthenticationTableSeeder');
         $this->call('TenunTableSeeder');
         $this->call('MotifTenunTableSeeder');
-        */
     }
 }
