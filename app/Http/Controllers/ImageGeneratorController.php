@@ -40,10 +40,9 @@ class ImageGeneratorController extends Controller{
 
     exec($command, $execResult, $retval);
 
-    print_r($command);
-
     return response()->json(array('error' => false,
-      'message'=>'Generate image success',
+      'message' => 'Generate image success',
+      'filename' => $fileName,
       'exec_result' => $folderPath . $fileName . '.jpg'),
       200);
   }
