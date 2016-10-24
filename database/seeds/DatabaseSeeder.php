@@ -15,7 +15,7 @@ class DatabaseSeeder extends Seeder
 
 
       //  $this->call('AuthenticationTableSeeder');
-      //  $this->call('TenunTableSeeder');
-        $this->call('MotifTenunTableSeeder');
+        $this->call('TenunTableSeeder');
+      //  $this->call('MotifTenunTableSeeder');
     }
 }

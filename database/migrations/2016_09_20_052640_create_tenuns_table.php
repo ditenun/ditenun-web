@@ -21,8 +21,8 @@ class CreateTenunsTable extends Migration
           $table->text('deskripsi_tenun')->nullable();
           $table->text('sejarah_tenun')->nullable();
           $table->enum('kegunaan_tenun',
-                  ['Pernikahan', 'Kematian', 'Busana',
-                  'Syukuran', 'Penghargaan', 'Lainnya']);
+                  ['Adat - Pernikahan', 'Kematian', 'Busana',
+                  'Adat - Syukuran', 'Adat - Penghargaan', 'Adat - Lainnya']);
           $table->string('warna_dominan', 75)->nullable()->default(NULL);
           $table->string('asal_tenun', 75)->nullable()->default(NULL);
           $table->string('img_src', 75)->nullable()->default(NULL);
