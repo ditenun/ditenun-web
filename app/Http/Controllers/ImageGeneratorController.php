@@ -29,7 +29,7 @@ class ImageGeneratorController extends Controller{
   }
 
   public function generateImg2(Request $request){
-    ini_set('max_execution_time', 180); //3 minutes
+    ini_set('max_execution_time', 360); //6 minutes
 
     $sourceFileName = $request->input('sourceFile', 'potongansadum0.jpg');
     $fileName = $request->input("fileName") . str_random(3);

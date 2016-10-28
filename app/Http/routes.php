@@ -39,4 +39,9 @@ $app->post('motifTenun', 'MotifItemController@createNewMotifItem');
 $app->get('motifTenun', 'MotifItemController@getListMotif');
 $app->get('motifTenun/{id}', 'MotifItemController@view');
 
+//route for algoritma
+$app->get('algoritma', 'AlgoritmaController@getListAlgoritma');
+$app->get('algoritmaParameter', 'AlgoritmaController@getListAlgoritmaParameter');
+$app->get('algoritmaWithParameter', 'AlgoritmaController@getListAlgoritmaWithParameter');
+
 $app->get('{path:.*}', 'CustomController@stuff');
