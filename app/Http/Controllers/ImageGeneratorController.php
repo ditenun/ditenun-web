@@ -49,7 +49,6 @@ class ImageGeneratorController extends Controller{
 
   public function generateImg3(Request $request){
     ini_set('max_execution_time', 360);
-    $treshold = $request->input('treshold', 0.8);
 
     $sourceFolderPath = '../../public/img_src/';
     $resultFolderPath = '../../public/img_temp/';
@@ -63,7 +62,13 @@ class ImageGeneratorController extends Controller{
 
     switch ($algo) {
       case 'img_quilting':
-        $command = "cd matlab_file/img_quilting/ && matlab -wait -nosplash -nodesktop -nodisplay -r \"img_quilting2('".$sourceFile."', '".$resultFile."', '.$treshold.'); exit;\"";
+        $treshold = $request->input('treshold_similarity', 0.7);
+
+        $command = "cd matlab_file/img_quilting/ && matlab -wait -nosplash -nodesktop -nodisplay -r \"img_quilting2('"
+          .$sourceFile."', '"
+          .$resultFile."', "
+          .$treshold."); exit;\"";
+
         exec($command, $execResult, $retval);
 
         return response()->json(array('error' => false,
@@ -100,6 +105,23 @@ class ImageGeneratorController extends Controller{
 
         break;
       case 'non_parametric_sample':
+        $block_size = $request->input('block_size', 10);
+
+        $command = "cd matlab_file/non_parametric/ && matlab -wait -nosplash -nodesktop -nodisplay -r "
+                    ."\"nps_main('".$sourceFile."', '"
+                    .$resultFile."', "
+                    .$block_size
+                    ."); exit;\"";
+
+        exec($command, $execResult, $retval);
+
+        return response()->json(array('error' => false,
+          'message' => 'Generate image success',
+          'filename' => $resultFileName,
+          'exec_result' => url("public/img_temp") . "/" . $resultFileName . '.jpg',
+          'algoritma' => $algo),
+          200);
+
         break;
       default:
           return response()->json(array('error' => true,
