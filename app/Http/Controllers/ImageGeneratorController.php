@@ -36,7 +36,7 @@ class ImageGeneratorController extends Controller{
     $folderPath = url("public/img_temp") . "/";
 
     $fileName = "genImg". str_replace('.', '', $sourceFileName) . "_" . $fileName;
-    $command = "cd matlab_file/ && matlab -wait -nosplash -nodesktop -nodisplay -r \"generateImg('".$sourceFileName."', '".$fileName."'); exit;\"";
+    $command = "cd matlab_file/img_quilting/ && matlab -wait -nosplash -nodesktop -nodisplay -r \"generateImg('".$sourceFileName."', '".$fileName."'); exit;\"";
 
     exec($command, $execResult, $retval);
 
@@ -51,8 +51,8 @@ class ImageGeneratorController extends Controller{
     ini_set('max_execution_time', 360);
     $treshold = $request->input('treshold', 0.8);
 
-    $sourceFolderPath = '../public/img_src/';
-    $resultFolderPath = '../public/img_temp/';
+    $sourceFolderPath = '../../public/img_src/';
+    $resultFolderPath = '../../public/img_temp/';
 
     $algo = $request->input('algoritma', "img_quilting");
     $sourceFileName = $request->input('sourceFile', 'potongansadum0.jpg');
@@ -63,25 +63,48 @@ class ImageGeneratorController extends Controller{
 
     switch ($algo) {
       case 'img_quilting':
-        $command = "cd matlab_file/ && matlab -wait -nosplash -nodesktop -nodisplay -r \"img_quilting2('".$sourceFile."', '".$resultFile."', '.$treshold.'); exit;\"";
+        $command = "cd matlab_file/img_quilting/ && matlab -wait -nosplash -nodesktop -nodisplay -r \"img_quilting2('".$sourceFile."', '".$resultFile."', '.$treshold.'); exit;\"";
         exec($command, $execResult, $retval);
 
         return response()->json(array('error' => false,
           'message' => 'Generate image success',
           'filename' => $resultFileName,
-          'exec_result' => url("public/img_temp") . "/" . $resultFileName . '.jpg'),
+          'exec_result' => url("public/img_temp") . "/" . $resultFileName . '.jpg',
+          'algoritma' => $algo),
           200);
-        break;
 
-      case 'img_warp':
-      
+        break;
+      case 'img_warping':
+        $intp_method = $request->input('interpolar_mode', 'invdist');
+        $intp_radius = $request->input('interpolar_radius', 5);
+        $intp_power = $request->input('interpolar_power', 2);
+
+        $command = "cd matlab_file/img_warping/ && matlab -wait -nosplash -nodesktop -nodisplay -r "
+                    ."\"tpsWarpDemo('".$sourceFile."', '"
+                    .$resultFile."', "
+                    ."'map.mat', "
+                    ."'tpsDemoLandmark.mat', '"
+                    .$intp_method."', "
+                    .$intp_radius.", "
+                    .$intp_power
+                    ."); exit;\"";
+
+        exec($command, $execResult, $retval);
+
+        return response()->json(array('error' => false,
+          'message' => 'Generate image success',
+          'filename' => $resultFileName,
+          'exec_result' => url("public/img_temp") . "/" . $resultFileName . '.jpg',
+          'algoritma' => $algo),
+          200);
+
+        break;
+      case 'non_parametric_sample':
         break;
       default:
-        case 'non_parametric_sample':
-        break;
-      return response()->json(array('error' => true,
-        'message' => 'Undefined algoritma [' . $algo . ']'),
-        200);
+          return response()->json(array('error' => true,
+          'message' => 'Undefined algoritma [' . $algo . ']'),
+          200);
         break;
     }
   }
