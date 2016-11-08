@@ -1,13 +1,12 @@
-function imgQuilting = example(SourceFile, newFileName)
-  display(SourceFile)
-  display(newFileName)
-
+function imgQuilting = example(SourceFile, newFileName, similarity_treshold)
   texture = imread(SourceFile);
+
+  display(similarity_treshold)
 
   [height, width, dim] = size(texture);
 
   outsize = size(texture)*0.5;
-  tilesize = floor((width/2)*0.8);  %256 * 80% =
+  tilesize = floor((width/2)*0.8);  %256 * similarity_treshold =
   overlapsize = (tilesize*2)-floor(width/2);
   isdebug = 1;
 
@@ -31,5 +30,5 @@ function imgQuilting = example(SourceFile, newFileName)
           imgFull = cat(1, imgResBottom,imgResUpper);
     timerVal=toc;
 
-    imgQuilting = imgFull;
+    imwrite(uint8(imgFull), newFileName);
 end

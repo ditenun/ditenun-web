@@ -47,4 +47,43 @@ class ImageGeneratorController extends Controller{
       200);
   }
 
+  public function generateImg3(Request $request){
+    ini_set('max_execution_time', 360);
+    $treshold = $request->input('treshold', 0.8);
+
+    $sourceFolderPath = '../public/img_src/';
+    $resultFolderPath = '../public/img_temp/';
+
+    $algo = $request->input('algoritma', "img_quilting");
+    $sourceFileName = $request->input('sourceFile', 'potongansadum0.jpg');
+    $resultFileName = "genImg" . str_replace('.', '', $sourceFileName) . "_" . $request->input("fileName") . str_random(3);
+
+    $sourceFile = $sourceFolderPath . $sourceFileName;
+    $resultFile = $resultFolderPath . $resultFileName . '.jpg';
+
+    switch ($algo) {
+      case 'img_quilting':
+        $command = "cd matlab_file/ && matlab -wait -nosplash -nodesktop -nodisplay -r \"img_quilting2('".$sourceFile."', '".$resultFile."', '.$treshold.'); exit;\"";
+        exec($command, $execResult, $retval);
+
+        return response()->json(array('error' => false,
+          'message' => 'Generate image success',
+          'filename' => $resultFileName,
+          'exec_result' => url("public/img_temp") . "/" . $resultFileName . '.jpg'),
+          200);
+        break;
+
+      case 'img_warp':
+      
+        break;
+      default:
+        case 'non_parametric_sample':
+        break;
+      return response()->json(array('error' => true,
+        'message' => 'Undefined algoritma [' . $algo . ']'),
+        200);
+        break;
+    }
+  }
+
 }
