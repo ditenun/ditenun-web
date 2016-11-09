@@ -62,7 +62,7 @@ class ImageGeneratorController extends Controller{
 
     switch ($algo) {
       case 'img_quilting':
-        $treshold = $request->input('treshold_similarity', 0.7);
+        $treshold = $request->input('treshold_similarity', 0.8);
 
         $command = "cd matlab_file/img_quilting/ && matlab -wait -nosplash -nodesktop -nodisplay -r \"img_quilting2('"
           .$sourceFile."', '"
