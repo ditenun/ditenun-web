@@ -80,7 +80,7 @@ class ImageGeneratorController extends Controller{
 
         break;
       case 'img_warping':
-        $intp_method = $request->input('interpolar_mode', 'invdist');
+        $intp_method = $request->input('interpolar_method', 'invdist');
         $intp_radius = $request->input('interpolar_radius', 5);
         $intp_power = $request->input('interpolar_power', 2);
 
