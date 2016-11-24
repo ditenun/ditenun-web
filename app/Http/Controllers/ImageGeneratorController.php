@@ -48,7 +48,7 @@ class ImageGeneratorController extends Controller{
   }
 
   public function generateImg3(Request $request){
-    ini_set('max_execution_time', 360);
+    ini_set('max_execution_time', 3600);
 
     $sourceFolderPath = '../../public/img_src/';
     $resultFolderPath = '../../public/img_temp/';
