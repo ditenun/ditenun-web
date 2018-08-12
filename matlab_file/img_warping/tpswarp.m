@@ -29,7 +29,7 @@ function [imgw, imgwr, map] = tpswarp(img, outDim, Zp, Zs, interp)
 % Date: 07-Apr-09
 
 %% Initialization
-NPs = size(Zp,1); % number of landmark points
+NPs = size(Zp,2); % number of landmark points
 
 imgH = size(img,1); % height
 imgW = size(img,2); % width

@@ -1,0 +1,10 @@
+{Error using <a href="matlab:matlab.internal.language.introspective.errorDocCallback('imread>get_full_filename', 'C:\Program Files\MATLAB\R2017a\toolbox\matlab\imagesci\imread.p', 516)" style="font-weight:bold">imread>get_full_filename</a> (<a href="matlab: opentoline('C:\Program Files\MATLAB\R2017a\toolbox\matlab\imagesci\imread.p',516,0)">line 516</a>)
+File "Data\1.jpg" does not exist.
+
+Error in <a href="matlab:matlab.internal.language.introspective.errorDocCallback('imread', 'C:\Program Files\MATLAB\R2017a\toolbox\matlab\imagesci\imread.p', 340)" style="font-weight:bold">imread</a> (<a href="matlab: opentoline('C:\Program Files\MATLAB\R2017a\toolbox\matlab\imagesci\imread.p',340,0)">line 340</a>)
+    fullname = get_full_filename(filename);
+
+Error in <a href="matlab:matlab.internal.language.introspective.errorDocCallback('noisedemo1', 'C:\xampp\htdocs\ModulTerbaru\api-tenun\matlab_file\img_noise\noisedemo1.m', 50)" style="font-weight:bold">noisedemo1</a> (<a href="matlab: opentoline('C:\xampp\htdocs\ModulTerbaru\api-tenun\matlab_file\img_noise\noisedemo1.m',50,0)">line 50</a>)
+   currentimage = double(imread(['Data\' currentfilename]));
+} 
+noisedemo1
