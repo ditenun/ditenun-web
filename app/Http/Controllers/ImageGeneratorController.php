@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use App\Models\Generate;
+use App\Models\MotifTenun;
 
 class ImageGeneratorController extends Controller{
 
@@ -30,7 +32,7 @@ class ImageGeneratorController extends Controller{
   }
 
   public function generateImg2(Request $request){
-    ini_set('max_execution_time', 360); //6 minutes
+    ini_set('max_execution_time', 300); //6 minutes
 
     $sourceFileName = $request->input('sourceFile', 'potongansadum1.jpg');
     $fileName = $request->input("fileName") . str_random(3);
@@ -201,7 +203,7 @@ class ImageGeneratorController extends Controller{
 
 
   public function generateNewMotif(Request $request){
-    ini_set('max_execution_time', 3600);
+    ini_set('max_execution_time', 1000);
 
     $sourceFolderPath = '../../public/img_src/';
     $resultFolderPath = '../../public/img_temp/';
@@ -209,23 +211,24 @@ class ImageGeneratorController extends Controller{
     $algo = $request->input('algoritma');
     $sourceFileName = $request->input('sourceFile', 'potongansadum0_128.jpg');
     // $resultFileName = "genImg" .str_random(3) .'_'. str_replace('.', '.', $sourceFileName);
-    $resultFileName = "genImg" . str_replace('.', '', $sourceFileName) . "_" . str_random(3);
+    // $resultFileName = "genImg" . str_replace('.', '', $sourceFileName) . "_" . str_random(3);
+    $resultFileName = "genImg_" . $sourceFileName . "_" . str_random(5);
 
-    $new_array= array();
 
-    $new_array = explode(".jpg", $sourceFileName);
 
     // $motif = DB::table('motif_tenuns')->where('nama_motif', $new_array[0])pluck('id');
-    $motif = DB::table('motif_tenuns')->where('nama_motif', $new_array[0])->first();
+    $motif =  MotifTenun::find($request->input('idMotif'));
 
     // var_dump($motif->id);
 
-    $sourceFile = $sourceFolderPath . $sourceFileName;
-    $resultFile = $resultFolderPath . $resultFileName . '.jpg';
+    $sourceFile = $sourceFolderPath . $sourceFileName .'.jpg';
+    $resultFile = $resultFolderPath . $resultFileName;
     $modelGenerate = $request->input('model');
     $warnaGenerate = $request->input('warna');
 
-    $matrix = 5;
+    #default matrix
+    $matrix = 2;
+
     if($modelGenerate=='Model-1'){
       $matrix = 2;
     }else if($modelGenerate == 'Model-2'){
@@ -234,7 +237,8 @@ class ImageGeneratorController extends Controller{
       $matrix = 4;
     }
 
-    $warna = 2;
+    #default warna
+    $warna = 1;
     if($warnaGenerate == 'Asli'){
       $warna = 1;
     }else if($warnaGenerate == 'Warna-Warni'){
@@ -244,27 +248,55 @@ class ImageGeneratorController extends Controller{
     }
 
     switch ($algo) {
-      case 'img_quilting':
-        $command = "cd matlab_file/Image_Quilting/ && matlab -wait -nosplash -nodesktop -nodisplay -r \"imgQuilting2('"
-          .$sourceFile."', '"
-          .$resultFile."', "
-          .$matrix."', "
-          .$warna."); exit;\"";
-          // print_r($motif['id']);
-          $id = DB::table('generate')->insertGetId(
-          ['idMotif' => $motif->id, 'generateFile' => 'public/img_temp/'. $resultFileName . '.jpg']
-        );
+      // case 'img_quilting':
+      //   $command = "cd matlab_file/Image_Quilting/ && matlab -wait -nosplash -nodesktop -nodisplay -r \"imgQuilting2('"
+      //     .$sourceFile."', '"
+      //     .$resultFile."', "
+      //     .$matrix."', "
+      //     .$warna.");exit; \"";
+      //     // print_r($motif['id']);
+      //
+      //
+      //   exec($command, $execResult, $retval);
+      //   $id = DB::table('generates')->insertGetId(
+      //   ['idMotif' => $motif->id, 'generateFile' => 'public/img_temp/'. $resultFileName . '.jpg', 'nama_generate'=>$resultFileName]
+      // );
+      //   return response()->json(array('error' => false,
+      //     'message' => 'Generate image success',
+      //     'filename' => $resultFileName,
+      //     'exec_result' => url("public/img_temp") . "/" . $resultFileName . '.jpg',
+      //     'data'=> Generate::find($id),
+      //     'algoritma' => $algo),
+      //     200);
+      //
+      //   break;
 
-        exec($command, $execResult, $retval);
+        case 'img_quilting':
+          $command = "cd matlab_file/Image_Quilting/ && matlab -wait -nosplash -nodesktop -nodisplay -r \"imgQuilting3('"
+            .$sourceFile."', '"
+            .$resultFile."', "
+            .$matrix."', "
+            .$warna.");exit; \"";
 
-        return response()->json(array('error' => false,
-          'message' => 'Generate image success',
-          'filename' => $resultFileName,
-          'exec_result' => url("public/img_temp") . "/" . $resultFileName . '.jpg',
-          'algoritma' => $algo),
-          200);
 
-        break;
+          exec($command, $execResult, $retval);
+          // if($retval==1){
+            for($i=1; $i<=2; $i++){
+              $id = DB::table('generates')->insertGetId(
+              ['idMotif' => $motif->id, 'generateFile' => 'public/img_temp/'. $resultFileName .'_' .$i . '.jpg', 'nama_generate'=>$resultFileName .'_' .$i]
+            );
+            }
+          // }
+
+          return response()->json(array('error' => false,
+            'message' => 'Generate image success',
+            'filename' => $resultFileName,
+            'exec_result' => url("public/img_temp") . "/" . $resultFileName . '.jpg',
+            'data'=> Generate::where('idMotif', $motif->id)->get(),
+            'algoritma' => $algo),
+            200);
+
+          break;
 
       case 'img_nps':
           // $treshold = $treshold / 100
@@ -274,6 +306,9 @@ class ImageGeneratorController extends Controller{
               .$matrix."', "
               .$warna."); exit;\"";
 
+              $id = DB::table('generates')->insertGetId(
+              ['idMotif' => $motif->id, 'generateFile' => 'public/img_temp/'. $resultFileName . '.jpg', 'nama_generate'=>$resultFileName]
+            );
           exec($command, $execResult, $retval);
 
           if($retval==1){
@@ -281,6 +316,7 @@ class ImageGeneratorController extends Controller{
                   'message' => 'Generate image success',
                   'filename' => $resultFileName,
                   'exec_result' => url("public/img_temp") . "/" . $resultFileName . '.jpg',
+                  'data'=> Generate::find($id),
                   'algoritma' => $algo),
                   200);
                 break;

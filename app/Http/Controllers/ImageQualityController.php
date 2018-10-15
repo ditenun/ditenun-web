@@ -40,11 +40,12 @@ class ImageQualityController extends Controller{
 
       // $name =  time().'.'.$image->getClientOriginalExtension();
       $nama_file = $image->getClientOriginalName();
+      $nama_file_save = pathinfo($nama_file, PATHINFO_FILENAME) .'.jpg';
       $nama_motif = pathinfo($nama_file, PATHINFO_FILENAME);
 
       $destinationPath = base_path('public/img_src'); // upload path
-      $request->file('photo')->move($destinationPath, $nama_file);
-      $img_src = "public/img_src/" .$nama_file;
+      $request->file('photo')->move($destinationPath, $nama_file_save);
+      $img_src = "public/img_src/" .$nama_file_save;
       $id = DB::table('motif_tenuns')->insertGetId(['id_tenun' => $id_tenun, 'nama_motif' => $nama_motif, 'img_src' => $img_src]);
       return response()->json(array('error' => false,
         'success'=>True,

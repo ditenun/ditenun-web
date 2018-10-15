@@ -36,17 +36,7 @@ class TenunItemController extends Controller
   public function createNewTenunItem(Request $request){
     $data = $this->checkInput($request->all());
     $token = $request->header('Authorization');
-
-    if(!empty($data['article_id'])) {
-      //TODO : Update row
-    } else {
-      //TODO : Create row
-      if (true) {
-          return response()->json(['success' => 'New item has been submitted'], 200);
-      } else {
-        return response()->json(['error' => 'Fail when submitting item'], 500);
-      }
-    }
+    
   }
 
   public function getListTenun(Request $request){

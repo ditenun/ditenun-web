@@ -31,7 +31,7 @@ $app->post('generateImg2', 'ImageGeneratorController@generateImg2');
 $app->post('generateImg3', 'ImageGeneratorController@generateImg3');
 $app->post('generateNewMotif', 'ImageGeneratorController@generateNewMotif');
 //route for tenun
-$app->post('tenun', 'TenunItemController@createNewTenunItem');
+// $app->post('tenun', 'TenunItemController@createNewTenunItem');
 $app->get('tenun', 'TenunItemController@getListTenun');
 $app->get('tenun/{id}', 'TenunItemController@view');
 
@@ -51,6 +51,9 @@ $app->post('checkNoise', 'ImageQualityController@checkNoise');
 $app->post('checkBlur', 'ImageQualityController@checkBlur');
 
 $app->post('kristikDigital', 'KristikDigitalController@createImages');
+$app->post('kristikDigitalAwal', 'KristikDigitalController@createImagesAwal');
+$app->get('listGenerate', 'GenerateController@getListGenerate');
 
+$app->post('ulosclassify', 'UlosController@ulosClassification');
 
 $app->get('{path:.*}', 'CustomController@stuff');

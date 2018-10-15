@@ -8,7 +8,7 @@ use Illuminate\Support\Facades\DB;
 final class Kristik extends Model{
 
   public function createNewItem(array $data){
-    DB::table('kristik')->insert(
+    DB::table('kristiks')->insert(
       [
         'sourceFile' => $data['sourceFile'],
         'kristikFile' => $data['kristikFile']

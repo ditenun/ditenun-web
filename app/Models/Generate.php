@@ -8,10 +8,11 @@ use Illuminate\Support\Facades\DB;
 final class Generate extends Model{
 
   public function createNewItem(array $data){
-    DB::table('generate')->insert(
+    DB::table('generates')->insert(
       [
         'idMotif' => $data['idMotif'],
-        'generateFile' => $data['generateFile']
+        'generateFile' => $data['generateFile'],
+        'nama_generate' => $data['nama_generate']
         //TODO : lengkapi
       ]);
   }
