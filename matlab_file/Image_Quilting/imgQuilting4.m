@@ -1,7 +1,6 @@
-function imgQuilting2 = example(SourceFile, newFileName, matrix, warna)
-  return
-    %display(SourceFile)
-    %display(newFileName)
+function imgQuilting = example(SourceFile, newFileName, matrix, warna)
+    %%display(SourceFile)
+    %%display(newFileName)
 
     texture = imread(SourceFile);
     [height, width, dim] = size(texture);
@@ -18,33 +17,34 @@ function imgQuilting2 = example(SourceFile, newFileName, matrix, warna)
     %untuk inputan ukurannya ganjil
     mod_panjang=mod(height,2);
     mod_lebar=mod(width,2);
+    %for l = 1:2
     if(mod_panjang ~= 0 && mod_lebar ~= 0)
         if(height>width)
             ukuran_new =imresize(texture,[(height+1), (height+1)]);
-            disp(ukuran_new)
+            %disp(ukuran_new)
             [height, width, dim] = size(ukuran_new);
 
-            %disp(size(ukuran_new))
+            %%disp(size(ukuran_new))
             outsize = size(ukuran_new)*0.5;
 
             tilesize = floor(((width)/2)*0.8);
             overlapsize = (tilesize*2)- floor((width)/2);
         elseif(width>height)
             ukuran_new =imresize(texture,[(width+1), (width+1)]);
-            disp(ukuran_new)
+            %disp(ukuran_new)
             [height, width, dim] = size(ukuran_new);
 
-            disp(size(ukuran_new))
+            %disp(size(ukuran_new))
             outsize = size(ukuran_new)*0.5;
 
             tilesize = floor(((width)/2)*0.8);
             overlapsize = (tilesize*2)- floor((width)/2);
         else
             ukuran_new =imresize(texture,[(width+1), (height+1)]);
-            disp(ukuran_new)
+            %disp(ukuran_new)
             [height, width, dim] = size(ukuran_new);
 
-            %disp(size(ukuran_new))
+            %%disp(size(ukuran_new))
             outsize = size(ukuran_new)*0.5;
 
             tilesize = floor(((width)/2)*0.8);
@@ -53,20 +53,20 @@ function imgQuilting2 = example(SourceFile, newFileName, matrix, warna)
     elseif(mod_panjang == 0 && mod_lebar ~= 0)
         if(height>width)
             ukuran_new =imresize(texture,[(height), (height)]);
-            disp(ukuran_new)
+            %disp(ukuran_new)
             [height, width, dim] = size(ukuran_new);
 
-            %disp(size(ukuran_new))
+            %%disp(size(ukuran_new))
             outsize = size(ukuran_new)*0.5;
 
             tilesize = floor(((width)/2)*0.8);
             overlapsize = (tilesize*2)- floor((width)/2);
         elseif(width>height)
             ukuran_new =imresize(texture,[(width+1), (width+1)]);
-            disp(ukuran_new)
+            %disp(ukuran_new)
             [height, width, dim] = size(ukuran_new);
 
-            %disp(size(ukuran_new))
+            %%disp(size(ukuran_new))
             outsize = size(ukuran_new)*0.5;
 
             tilesize = floor(((width)/2)*0.8);
@@ -76,20 +76,20 @@ function imgQuilting2 = example(SourceFile, newFileName, matrix, warna)
     elseif(mod_panjang ~= 0 && mod_lebar == 0)
         if(height>width)
             ukuran_new =imresize(texture,[(height+1), (height+1)]);
-            disp(ukuran_new)
+            %disp(ukuran_new)
             [height, width, dim] = size(ukuran_new);
 
-            %disp(size(ukuran_new))
+            %%disp(size(ukuran_new))
             outsize = size(ukuran_new)*0.5;
 
             tilesize = floor(((width)/2)*0.8);
             overlapsize = (tilesize*2)- floor((width)/2);
         elseif(width>height)
             ukuran_new =imresize(texture,[(width), (width)]);
-            disp(ukuran_new)
+            %disp(ukuran_new)
             [height, width, dim] = size(ukuran_new);
 
-            %disp(size(ukuran_new))
+            %%disp(size(ukuran_new))
             outsize = size(ukuran_new)*0.5;
 
             tilesize = floor(((width)/2)*0.8);
@@ -98,30 +98,30 @@ function imgQuilting2 = example(SourceFile, newFileName, matrix, warna)
     else
         if(height>width)
             ukuran_new =imresize(texture,[(height), (height)]);
-            disp(ukuran_new)
+            %disp(ukuran_new)
             [height, width, dim] = size(ukuran_new);
 
-            %disp(size(ukuran_new))
+            %%disp(size(ukuran_new))
             outsize = size(ukuran_new)*0.5;
 
             tilesize = floor(((width)/2)*0.8);
             overlapsize = (tilesize*2)- floor((width)/2);
         elseif(width>height)
             ukuran_new =imresize(texture,[(width), (width)]);
-            disp(ukuran_new)
+            %disp(ukuran_new)
             [height, width, dim] = size(ukuran_new);
 
-            %disp(size(ukuran_new))
+            %%disp(size(ukuran_new))
             outsize = size(ukuran_new)*0.5;
 
             tilesize = floor(((width)/2)*0.8);
             overlapsize = (tilesize*2)- floor((width)/2);
         else
             ukuran_new =imresize(texture,[(height), (width)]);
-            disp(ukuran_new)
+            %disp(ukuran_new)
             [height, width, dim] = size(ukuran_new);
 
-            %disp(size(ukuran_new))
+            %%disp(size(ukuran_new))
             outsize = size(ukuran_new)*0.5;
 
             tilesize = floor(((width)/2)*0.8);
@@ -198,7 +198,7 @@ function imgQuilting2 = example(SourceFile, newFileName, matrix, warna)
                       newii(:,:,2)=x(:,:,1);
                       newii(:,:,3)=x(:,:,1);
                   else
-                      disp('Angka yang Anda masukkan salah pada pemilihan warna');
+                      %disp('Angka yang Anda masukkan salah pada pemilihan warna');
                       break;
                   end
                   figure()
@@ -314,7 +314,7 @@ function imgQuilting2 = example(SourceFile, newFileName, matrix, warna)
                       newii(:,:,2)=x(:,:,1);
                       newii(:,:,3)=x(:,:,1);
                   else
-                      disp('Angka yang Anda masukkan salah pada pemilihan warna');
+                      %disp('Angka yang Anda masukkan salah pada pemilihan warna');
                       break;
                   end
 
@@ -368,7 +368,7 @@ function imgQuilting2 = example(SourceFile, newFileName, matrix, warna)
                       newii(:,:,2)=x(:,:,1);
                       newii(:,:,3)=x(:,:,1);
                   else
-                      disp('Angka yang Anda masukkan salah pada pemilihan warna');
+                      %disp('Angka yang Anda masukkan salah pada pemilihan warna');
                       break;
                   end
 
@@ -384,12 +384,13 @@ function imgQuilting2 = example(SourceFile, newFileName, matrix, warna)
               i = i + 1;
           end
       else
-          disp('Inputan matrix sebaiknya lebih dari 0!');
+          %disp('Inputan matrix sebaiknya lebih dari 0!');
       end
 
+
       if(warna ~= 1)
-            imwrite(uint8(imgFullBerwarna),newFileName,'jpg')
+            imwrite(uint8(imgFullBerwarna), strcat(newFileName, '.jpg'),'jpg')
         else
-            imwrite(uint8(imgFullAsli),newFileName,'jpg')
+            imwrite(uint8(imgFullAsli), strcat(newFileName, '.jpg'),'jpg')
         end
   end
