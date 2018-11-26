@@ -31,7 +31,7 @@ function imgQuilting3 = example(SourceFile, newFileName, matrix, warna)
     isdebug = 1;
     i = 1;
     tic;
-    
+
     imgMirror_original = synthesize(ukuran_new, outsize, tilesize, overlapsize, isdebug);
 
     if(inputan < 1)
@@ -136,8 +136,8 @@ function imgQuilting3 = example(SourceFile, newFileName, matrix, warna)
     tilesize = tilesize + i;
 
     if(warna ~= 1)
-      imwrite(uint8(imgFullBerwarna),strcat(newFileName, '.jpg'),'jpg')
+      imwrite(uint8(imgFullBerwarna),newFileName,'jpg')
     else
-      imwrite(uint8(imgFullAsli),strcat(newFileName, '.jpg'),'jpg')
+      imwrite(uint8(imgFullAsli),newFileName,'jpg')
     end
   end
