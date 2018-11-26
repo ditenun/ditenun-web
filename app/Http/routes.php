@@ -15,7 +15,17 @@ use App\Http\Controllers\Controller;
 */
 
 /*
-Its hard to make a point
+It
+
+
+
+
+
+
+
+
+
+s hard to make a point
 When youre living so loud -- vulfpeck
 */
 
@@ -29,7 +39,9 @@ $app->get('/status', function () use ($app) {
 $app->post('generateImg', 'ImageGeneratorController@generateImg');
 $app->post('generateImg2', 'ImageGeneratorController@generateImg2');
 $app->post('generateImg3', 'ImageGeneratorController@generateImg3');
-$app->post('generateNewMotif', 'ImageGeneratorController@generateNewMotif');
+$app->post('generateNewMotif', 'ImageGeneratorController2@generateNewMotif');
+$app->post('motif', 'ImageGeneratorController@motif');
+$app->post('buatMotifBaru', 'ImageGeneratorController@buatMotifBaru');
 //route for tenun
 // $app->post('tenun', 'TenunItemController@createNewTenunItem');
 $app->get('tenun', 'TenunItemController@getListTenun');
@@ -52,6 +64,8 @@ $app->post('checkBlur', 'ImageQualityController@checkBlur');
 
 $app->post('kristikDigital', 'KristikDigitalController@createImages');
 $app->post('kristikDigitalAwal', 'KristikDigitalController@createImagesAwal');
+$app->post('kristik', 'KristikDigitalController@kristik');
+$app->post('kristik-to-edit', 'KristikDigitalController@kristikToEdit');
 $app->get('listGenerate', 'GenerateController@getListGenerate');
 
 $app->post('ulosclassify', 'UlosController@ulosClassification');

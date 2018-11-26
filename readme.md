@@ -2,7 +2,7 @@
 API for TenunApp Piksel & IT Del
 
 php -S [local_ip]:[8080]
-https://www.jtenun.com/ModulTerbaru/api-tenun/[service_name]
+https://documenter.getpostman.com/view/1669089/RzZFAvAq
 
 ## License
 
