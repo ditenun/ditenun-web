@@ -159,6 +159,7 @@ class KristikDigitalController extends Controller{
         imagedestroy($square);
       }
     }
+
     ImageTrueColorToPalette($checkeredInput, false, $colorsAmount);
     ImageColorMatch($sourceResized, $checkeredInput);//improving colors
     imagedestroy($sourceResized);
@@ -173,6 +174,8 @@ class KristikDigitalController extends Controller{
         imagedestroy($square);
       }
     }
+
+
     imagedestroy($checkeredInput);
 
     //changing colors to DMC
