@@ -6,7 +6,7 @@ use Illuminate\Support\Facades\DB;
 use App\Models\Generate;
 use App\Models\MotifTenun;
 
-class ImageGeneratorController2 extends Controller{
+class ImageGenerator2Controller extends Controller{
 
   public function __construct()
   {  }

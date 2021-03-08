@@ -1,5 +1,4 @@
-function Ans = getxcorr2(A,B)
-
+function Ans = getxcorr22(A,B)
 
 if ( size(A,3) == size(B,3) )
     Ans = xcorr2(A(:,:,1),B(:,:,1));

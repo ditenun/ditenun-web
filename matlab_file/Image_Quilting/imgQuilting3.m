@@ -19,6 +19,10 @@ function imgQuilting3 = example(SourceFile, newFileName, matrix, warna)
     elseif(mod_panjang ~= 0)
         newSize = newSize + 1;
     end
+    if(newSize > 600)
+      newSize = 600;
+    end
+
     ukuran_new =imresize(texture,[newSize, newSize]);
     [height, width, dim] = size(ukuran_new);
     %operasi perkalian matriks, hasil matriks
@@ -28,7 +32,7 @@ function imgQuilting3 = example(SourceFile, newFileName, matrix, warna)
 
     %for l = 1:2
     l = 1;
-    isdebug = 1;
+    isdebug = 0;
     i = 1;
     tic;
 

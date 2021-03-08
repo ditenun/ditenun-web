@@ -10,7 +10,7 @@ use App\Models\Kristik;
 class KristikDigitalController extends Controller{
 
   // current max dimen 141 => 19881
-  const MAX_SIZE = 7918596;
+  const MAX_SIZE = 7000000;//7918596;
   const CROSS_STITCH = 20;
   public function __construct()
   {
@@ -24,7 +24,7 @@ class KristikDigitalController extends Controller{
     $min_dimen = self::MAX_SIZE;
 
     // memory_limit=128M
-    if(!$request->hasFile($img_file) || !in_array(strtolower($request->file($img_file)->getClientOriginalExtension()), ['jpg', 'jpeg', 'png', 'tiff', 'gif', 'bmp'])/*|| number_format($request->file($img_file)->getSize() / 1048576, 2) > 2*/){
+    if(!$request->hasFile($img_file) || !in_array(strtolower($request->file($img_file)->getClientOriginalExtension()), ['jpg', 'jpeg', 'png'/*, 'tiff', 'gif', 'bmp'*/])/*|| number_format($request->file($img_file)->getSize() / 1048576, 2) > 2*/){
       if($msg=='')
         $msg .= $img_file;
       else $msg .= ', '.$img_file;
@@ -104,9 +104,9 @@ class KristikDigitalController extends Controller{
 
       $image = $request->file('img_file');
       $extension = image_type_to_extension(getimagesize($image)[2]);
-      $nama_file = $image->getClientOriginalName();
+      $nama_file = str_random(10);//$image->getClientOriginalName();
       $nama_file_save = pathinfo($nama_file, PATHINFO_FILENAME) .$extension;
-      $nama_motif = pathinfo($nama_file, PATHINFO_FILENAME);
+      //$nama_motif = pathinfo($nama_file, PATHINFO_FILENAME);
       $destinationPath = base_path('storage\app\kristik\param_temp\before'); // upload path
       $image->move($destinationPath, $nama_file_save);
       $sourceFile = $destinationPath .'\\' . $nama_file_save;
@@ -212,7 +212,123 @@ class KristikDigitalController extends Controller{
     ];
   }
 
-  public function kristik(Request $request) {
+  private function sharedFunctionHP(Request $request){
+    ini_set('max_execution_time', 1500);
+    // get param request
+    $squareSize = $request->input('square_size');
+    $colorsAmount = $request->input('color_amount');
+
+      $image = $request->file('img_file');
+      $extension = image_type_to_extension(getimagesize($image)[2]);
+      $nama_file = str_random(10);//$image->getClientOriginalName();
+      $nama_file_save = pathinfo($nama_file, PATHINFO_FILENAME) .$extension;
+      //$nama_motif = pathinfo($nama_file, PATHINFO_FILENAME);
+      $destinationPath = base_path('storage\app\kristik\param_temp\before'); // upload path
+      $image->move($destinationPath, $nama_file_save);
+      $sourceFile = $destinationPath .'\\' . $nama_file_save;
+
+    // get image
+    $imagedata = file_get_contents($sourceFile);
+    $base64 = base64_encode($imagedata);
+    $data = base64_decode($base64);
+    $source = imagecreatefromstring($data);
+
+    // get image size, create new size based on squareSize param
+    $source_width = imagesx($source);
+    $source_height = imagesy($source);
+    $this->optimizeResolution($source_width, $source_height, $squareSize);
+    $newWidth = $source_width - $source_width%$squareSize;
+    $newHeight = $source_height - $source_height%$squareSize;
+
+    // banyaknya kotak, semakin besar param square_size, semakin sedikit jumlah kotak. hasil juga semakin kecil karena ukuran hanya 1 pixel per kotak
+    $squaresWidth = $newWidth/$squareSize;
+    $squaresHeight = $newHeight/$squareSize;
+    $source_width = imagesx($source);
+    $source_height = imagesy($source);
+
+    // creating scaled copy of input image, truecolor = 24 bits per pixel
+    $sourceResized = imagecreatetruecolor($newWidth, $newHeight);
+    // making white background for images with transparency
+    $whiteBackground = imagecolorallocate($sourceResized, 255, 255, 255);
+    imagefill($sourceResized, 0, 0, $whiteBackground);
+    imagecopyresampled($sourceResized, $source, 0, 0, 0, 0, $newWidth, $newHeight, $source_width, $source_height);
+    imagedestroy($source); // release memory
+    // input image turned into squares
+    $checkeredInput = imagecreatetruecolor($newWidth, $newHeight);
+
+    // filling checkeredInput
+    // imagecopyresampled > imagecopyresized > imagecopy
+    for($row = 0; $row<$squaresHeight; $row++) {
+      for($col = 0; $col<$squaresWidth; $col++) {
+        $square = @imagecreatetruecolor($squareSize, $squareSize);
+        imagecopyresized($square, $sourceResized, 0, 0, $col * $squareSize, $row * $squareSize, $squareSize, $squareSize, $squareSize, $squareSize);
+
+        $scaled = @imagecreatetruecolor(1, 1);
+        imagecopyresampled($scaled, $square, 0, 0, 0, 0, 1, 1, $squareSize, $squareSize);
+        $meanColor = imagecolorat($scaled, 0, 0);
+        imagedestroy($scaled);
+        imagedestroy($square);
+
+        $square = @imagecreatetruecolor($squareSize, $squareSize);
+        imagefill($square, 0, 0, $meanColor);
+        imagecopymerge($checkeredInput, $square, $col * $squareSize, $row * $squareSize, 0, 0, $squareSize, $squareSize, 100);
+        imagedestroy($square);
+      }
+    }
+    ImageTrueColorToPalette($checkeredInput, false, $colorsAmount);
+    ImageColorMatch($sourceResized, $checkeredInput);//improving colors
+    imagedestroy($sourceResized);
+
+    //creating colors array
+    $colors = array();
+    for($row = 0; $row<$squaresHeight; $row++) {
+      for($col = 0; $col<$squaresWidth; $col++) {
+        $square = @imagecreatetruecolor($squareSize, $squareSize);
+        imagecopyresized($square, $checkeredInput, 0, 0, $col * $squareSize, $row * $squareSize, $squareSize, $squareSize, $squareSize, $squareSize);
+        $colors[] = imagecolorat($square, 0, 0);
+        imagedestroy($square);
+      }
+    }
+    imagedestroy($checkeredInput);
+
+    //changing colors to DMC
+    $specifiedColors = array_keys(array_count_values($colors));
+    $usedDMC = array();
+    foreach($specifiedColors as $key => $color) {
+      $r = ($color >> 16) & 0xFF;
+      $g = ($color >> 8) & 0xFF;
+      $b = $color & 0xFF;
+
+      $distArr = array();
+      $DMClist = Kristik::$HitamPutih;
+      foreach($DMClist as $DMCkey => $DMCcolor) {
+        $DMCr = $DMCcolor[2];
+        $DMCg = $DMCcolor[3];
+        $DMCb = $DMCcolor[4];
+        $distArr[$DMCkey] = sqrt(pow($r - $DMCr, 2) + pow($g - $DMCg, 2) + pow($b - $DMCb, 2));
+      }
+
+      asort($distArr);
+      $DMCcolorKey = key($distArr);
+      $newColors = array();
+      foreach($colors as $key => $colorOnImage) {
+        if($colorOnImage == $color)
+          $newColors[] = (($DMClist[$DMCcolorKey][2])<<16)|(($DMClist[$DMCcolorKey][3])<<8)|($DMClist[$DMCcolorKey][4]);
+        else
+          $newColors[] = $colorOnImage;
+      }
+      $colors = $newColors;
+      $usedDMC[] = $DMClist[$DMCcolorKey];
+    }
+    return [
+      'squaresWidth' => $squaresWidth,
+      'squaresHeight' => $squaresHeight,
+      'colors' => $colors,
+      'nama_file_save' => $nama_file_save
+    ];
+  }
+
+  public function kristiks(Request $request) {
     $msg = $this->validateParam($request);
     if($msg != ''){
       return response()->json(array(
@@ -245,6 +361,7 @@ class KristikDigitalController extends Controller{
         }
 
         ob_start();
+        //from 0 (no compression) to 9
         imagepng($simulation, NULL, 9);
         $image_data = ob_get_contents();
         $imageName = str_random(10).'.'.'png';
@@ -257,6 +374,199 @@ class KristikDigitalController extends Controller{
         return response($image_data)->header('Content-Type','image/png');
         imagedestroy($simulation);
   }
+
+  // Kristiks remove Grid
+  public function kristiksRemoveGrid(Request $request) {
+    $msg = $this->validateParam($request);
+    if($msg != ''){
+      return response()->json(array(
+        'message'=>$msg.' is not valid'
+      ), 200);
+    }
+        $res = $this->sharedFunction($request);
+        $squaresWidth = $res['squaresWidth'];
+        $squaresHeight = $res['squaresHeight'];
+        $colors = $res['colors'];
+        $nama_file_save = $res['nama_file_save'];
+
+        //simulation of cross-stich
+        $simulationSquare = self::CROSS_STITCH;
+        $simulation = imagecreatetruecolor($squaresWidth*$simulationSquare, $squaresHeight*$simulationSquare);
+        $i=0;
+        for($row = 0; $row<$squaresHeight; $row++) {
+          for($col = 0; $col<$squaresWidth; $col++) {
+            $r = ($colors[$i] >> 16) & 0xFF;
+            $g = ($colors[$i] >> 8) & 0xFF;
+            $b = $colors[$i] & 0xFF;
+
+            $square = @imagecreatetruecolor($simulationSquare, $simulationSquare);
+            //filling simulation
+            $square = $this->colorizeBasedOnAlphaChannnel(base_path('public/icons/11.png'), $r, $g, $b, $simulationSquare);
+            imagecopymerge($simulation, $square, $col * $simulationSquare, $row * $simulationSquare, 0, 0, $simulationSquare, $simulationSquare, 80);
+            imagedestroy($square);
+            $i++;
+          }
+        }
+
+        ob_start();
+        //from 0 (no compression) to 9
+        imagepng($simulation, NULL, 9);
+        $image_data = ob_get_contents();
+        $imageName = str_random(10).'.'.'png';
+        Storage::put('kristik/param_temp/after/'.$imageName, $image_data);
+        ob_end_clean();
+
+        $id = DB::table('kristiks')->insertGetId(
+            ['sourceFile' => 'storage/app/kristik/param_temp/before/'.$nama_file_save, 'kristikFile' => 'storage/app/kristik/param_temp/after/'.$imageName]
+        );
+        return response($image_data)->header('Content-Type','image/png');
+        imagedestroy($simulation);
+  }
+
+
+  public function kristikHitamPutih(Request $request){
+    $msg = $this->validateParam($request);
+    if($msg != ''){
+      return response()->json(array(
+        'message'=>$msg.' is not valid'
+      ), 200);
+    }
+        $res = $this->sharedFunctionHP($request);
+        $squaresWidth = $res['squaresWidth'];
+        $squaresHeight = $res['squaresHeight'];
+        $colors = $res['colors'];
+        $nama_file_save = $res['nama_file_save'];
+
+        //simulation of cross-stich
+        $simulationSquare = self::CROSS_STITCH;
+        $simulation = imagecreatetruecolor($squaresWidth*$simulationSquare, $squaresHeight*$simulationSquare);
+        $i=0;
+        for($row = 0; $row<$squaresHeight; $row++) {
+          for($col = 0; $col<$squaresWidth; $col++) {
+            $r = ($colors[$i] >> 16) & 0xFF;
+            $g = ($colors[$i] >> 8) & 0xFF;
+            $b = $colors[$i] & 0xFF;
+
+            $square = @imagecreatetruecolor($simulationSquare, $simulationSquare);
+            //filling simulation
+            $square = $this->colorizeBasedOnAlphaChannnel(base_path('public/icons/square.png'), $r, $g, $b, $simulationSquare);
+            imagecopymerge($simulation, $square, $col * $simulationSquare, $row * $simulationSquare, 0, 0, $simulationSquare, $simulationSquare, 80);
+            imagedestroy($square);
+            $i++;
+          }
+        }
+
+        ob_start();
+        //from 0 (no compression) to 9
+        imagepng($simulation, NULL, 9);
+        $image_data = ob_get_contents();
+        $imageName = str_random(10).'.'.'png';
+        Storage::put('kristik/param_temp/after/'.$imageName, $image_data);
+        ob_end_clean();
+
+        $id = DB::table('kristiks')->insertGetId(
+            ['sourceFile' => 'storage/app/kristik/param_temp/before/'.$nama_file_save, 'kristikFile' => 'storage/app/kristik/param_temp/after/'.$imageName]
+        );
+        return response($image_data)->header('Content-Type','image/png');
+        imagedestroy($simulation);
+  }
+
+  //kristik hitam putih remove grid
+  public function kristikHitamPutihRemoveGrid(Request $request){
+    $msg = $this->validateParam($request);
+    if($msg != ''){
+      return response()->json(array(
+        'message'=>$msg.' is not valid'
+      ), 200);
+    }
+        $res = $this->sharedFunctionHP($request);
+        $squaresWidth = $res['squaresWidth'];
+        $squaresHeight = $res['squaresHeight'];
+        $colors = $res['colors'];
+        $nama_file_save = $res['nama_file_save'];
+
+        //simulation of cross-stich
+        $simulationSquare = self::CROSS_STITCH;
+        $simulation = imagecreatetruecolor($squaresWidth*$simulationSquare, $squaresHeight*$simulationSquare);
+        $i=0;
+        for($row = 0; $row<$squaresHeight; $row++) {
+          for($col = 0; $col<$squaresWidth; $col++) {
+            $r = ($colors[$i] >> 16) & 0xFF;
+            $g = ($colors[$i] >> 8) & 0xFF;
+            $b = $colors[$i] & 0xFF;
+
+            $square = @imagecreatetruecolor($simulationSquare, $simulationSquare);
+            //filling simulation
+            $square = $this->colorizeBasedOnAlphaChannnel(base_path('public/icons/square.png'), $r, $g, $b, $simulationSquare);
+            imagecopymerge($simulation, $square, $col * $simulationSquare, $row * $simulationSquare, 0, 0, $simulationSquare, $simulationSquare, 80);
+            imagedestroy($square);
+            $i++;
+          }
+        }
+
+        ob_start();
+        //from 0 (no compression) to 9
+        imagepng($simulation, NULL, 9);
+        $image_data = ob_get_contents();
+        $imageName = str_random(10).'.'.'png';
+        Storage::put('kristik/param_temp/after/'.$imageName, $image_data);
+        ob_end_clean();
+
+        $id = DB::table('kristiks')->insertGetId(
+            ['sourceFile' => 'storage/app/kristik/param_temp/before/'.$nama_file_save, 'kristikFile' => 'storage/app/kristik/param_temp/after/'.$imageName]
+        );
+        return response($image_data)->header('Content-Type','image/png');
+        imagedestroy($simulation);
+  }
+
+
+  //
+  // public function kristik(Request $request){
+  //   $msg = $this->validateParam($request);
+  //   if($msg != ''){
+  //     return response()->json(array(
+  //       'message'=>$msg.' is not valid'
+  //     ), 200);
+  //   }
+  //       $res = $this->sharedFunction($request);
+  //       $squaresWidth = $res['squaresWidth'];
+  //       $squaresHeight = $res['squaresHeight'];
+  //       $colors = $res['colors'];
+  //       $nama_file_save = $res['nama_file_save'];
+  //
+  //       //simulation of cross-stich
+  //       $simulationSquare = self::CROSS_STITCH;
+  //       $simulation = imagecreatetruecolor($squaresWidth*$simulationSquare, $squaresHeight*$simulationSquare);
+  //       $i=0;
+  //       for($row = 0; $row<$squaresHeight; $row++) {
+  //         for($col = 0; $col<$squaresWidth; $col++) {
+  //           $r = ($colors[$i] >> 16) & 0xFF;
+  //           $g = ($colors[$i] >> 8) & 0xFF;
+  //           $b = $colors[$i] & 0xFF;
+  //
+  //           $square = @imagecreatetruecolor($simulationSquare, $simulationSquare);
+  //           //filling simulation
+  //           $square = $this->colorizeBasedOnAlphaChannnel(base_path('public/icons/square.png'), $r, $g, $b, $simulationSquare);
+  //           imagecopymerge($simulation, $square, $col * $simulationSquare, $row * $simulationSquare, 0, 0, $simulationSquare, $simulationSquare, 80);
+  //           imagedestroy($square);
+  //           $i++;
+  //         }
+  //       }
+  //
+  //       ob_start();
+  //       //from 0 (no compression) to 9
+  //       imagepng($simulation, NULL, 9);
+  //       $image_data = ob_get_contents();
+  //       $imageName = str_random(10).'.'.'png';
+  //       Storage::put('kristik/param_temp/after/'.$imageName, $image_data);
+  //       ob_end_clean();
+  //
+  //       $id = DB::table('kristiks')->insertGetId(
+  //           ['sourceFile' => 'storage/app/kristik/param_temp/before/'.$nama_file_save, 'kristikFile' => 'storage/app/kristik/param_temp/after/'.$imageName]
+  //       );
+  //       return response($image_data)->header('Content-Type','image/png');
+  //       imagedestroy($simulation);
+  // }
 
   public function kristikToEdit(Request $request) {
     $msg = $this->validateParam($request);
@@ -301,7 +611,7 @@ class KristikDigitalController extends Controller{
       $id = DB::table('kristiks')->insertGetId(
           ['sourceFile' => 'storage/app/kristik/param_temp/before/'.$nama_file_save, 'kristikFile' => 'storage/app/kristik/param_temp/after/'.$imageName]
       );
-      // return response($image_data)->header('Content-Type','image/png');
+      return response($image_data)->header('Content-Type','image/png');
       return response()->json(array('success' => true,
         'message'=>'Generate Kristik Success',
         'data' => Kristik::find($id)),
