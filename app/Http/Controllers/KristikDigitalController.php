@@ -137,73 +137,46 @@ class KristikDigitalController extends Controller{
     imagefill($sourceResized, 0, 0, $whiteBackground);
     imagecopyresampled($sourceResized, $source, 0, 0, 0, 0, $newWidth, $newHeight, $source_width, $source_height);
     imagedestroy($source); // release memory
-    // input image turned into squares
+
     $checkeredInput = imagecreatetruecolor($newWidth, $newHeight);
-
-    // filling checkeredInput
-    // imagecopyresampled > imagecopyresized > imagecopy
     for($row = 0; $row<$squaresHeight; $row++) {
-      for($col = 0; $col<$squaresWidth; $col++) {
-        $square = @imagecreatetruecolor($squareSize, $squareSize);
-        imagecopyresized($square, $sourceResized, 0, 0, $col * $squareSize, $row * $squareSize, $squareSize, $squareSize, $squareSize, $squareSize);
+		for($col = 0; $col<$squaresWidth; $col++) {
+			$square = @imagecreatetruecolor($squareSize, $squareSize);
+			imagecopyresized($square, $sourceResized, 0, 0, $col * $squareSize, $row * $squareSize, $squareSize, $squareSize, $squareSize, $squareSize);
 
-        $scaled = @imagecreatetruecolor(1, 1);
-        imagecopyresampled($scaled, $square, 0, 0, 0, 0, 1, 1, $squareSize, $squareSize);
-        $meanColor = imagecolorat($scaled, 0, 0);
-        imagedestroy($scaled);
-        imagedestroy($square);
+			$scaled = @imagecreatetruecolor(1,1);
+			imagecopyresampled($scaled, $square, 0, 0, 0, 0, 1, 1, $squareSize, $squareSize);
+			$meanColor = imagecolorat($scaled, 0, 0);
+			imagedestroy($scaled);
 
-        $square = @imagecreatetruecolor($squareSize, $squareSize);
-        imagefill($square, 0, 0, $meanColor);
-        imagecopymerge($checkeredInput, $square, $col * $squareSize, $row * $squareSize, 0, 0, $squareSize, $squareSize, 100);
-        imagedestroy($square);
-      }
-    }
-    ImageTrueColorToPalette($checkeredInput, false, $colorsAmount);
-    ImageColorMatch($sourceResized, $checkeredInput);//improving colors
-    imagedestroy($sourceResized);
+			//filling checkeredInput
+			$square = @imagecreatetruecolor($squareSize, $squareSize);
+			imagefill($square, 0, 0, $meanColor);
+			imagecopymerge($checkeredInput, $square, $col * $squareSize, $row * $squareSize, 0, 0, $squareSize, $squareSize, 60);
 
-    //creating colors array
-    $colors = array();
-    for($row = 0; $row<$squaresHeight; $row++) {
-      for($col = 0; $col<$squaresWidth; $col++) {
-        $square = @imagecreatetruecolor($squareSize, $squareSize);
-        imagecopyresized($square, $checkeredInput, 0, 0, $col * $squareSize, $row * $squareSize, $squareSize, $squareSize, $squareSize, $squareSize);
-        $colors[] = imagecolorat($square, 0, 0);
-        imagedestroy($square);
-      }
-    }
-    imagedestroy($checkeredInput);
+			imagedestroy($square);
+		}
+	}
 
-    //changing colors to DMC
-    $specifiedColors = array_keys(array_count_values($colors));
-    $usedDMC = array();
-    foreach($specifiedColors as $key => $color) {
-      $r = ($color >> 16) & 0xFF;
-      $g = ($color >> 8) & 0xFF;
-      $b = $color & 0xFF;
+	ImageTrueColorToPalette($checkeredInput, false, $colorsAmount);
+	ImageColorMatch($sourceResized, $checkeredInput);//improving colors
 
-      $distArr = array();
-      $DMClist = Kristik::$DMClist;
-      foreach($DMClist as $DMCkey => $DMCcolor) {
-        $DMCr = $DMCcolor[2];
-        $DMCg = $DMCcolor[3];
-        $DMCb = $DMCcolor[4];
-        $distArr[$DMCkey] = sqrt(pow($r - $DMCr, 2) + pow($g - $DMCg, 2) + pow($b - $DMCb, 2));
-      }
+	imagedestroy($sourceResized);
 
-      asort($distArr);
-      $DMCcolorKey = key($distArr);
-      $newColors = array();
-      foreach($colors as $key => $colorOnImage) {
-        if($colorOnImage == $color)
-          $newColors[] = (($DMClist[$DMCcolorKey][2])<<16)|(($DMClist[$DMCcolorKey][3])<<8)|($DMClist[$DMCcolorKey][4]);
-        else
-          $newColors[] = $colorOnImage;
-      }
-      $colors = $newColors;
-      $usedDMC[] = $DMClist[$DMCcolorKey];
-    }
+
+	//creating colors array
+	$colors = array();
+	for($row = 0; $row<$squaresHeight; $row++) {
+		for($col = 0; $col<$squaresWidth; $col++) {
+			$square = @imagecreatetruecolor($squareSize, $squareSize);
+			imagecopyresized($square, $checkeredInput, 0, 0, $col * $squareSize, $row * $squareSize, $squareSize, $squareSize, $squareSize, $squareSize);
+			$colors[] = imagecolorat($square, 0, 0);
+
+			imagedestroy($square);
+		}
+	}
+
+	imagedestroy($checkeredInput);
     return [
       'squaresWidth' => $squaresWidth,
       'squaresHeight' => $squaresHeight,
