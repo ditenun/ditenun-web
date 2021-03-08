@@ -6,7 +6,7 @@ use Illuminate\Support\Facades\DB;
 use App\Models\Generate;
 use App\Models\MotifTenun;
 
-class ImageGeneratorController extends Controller{
+class ImageGenerator4Controller extends Controller{
 
   public function __construct()
   {  }
@@ -39,13 +39,6 @@ class ImageGeneratorController extends Controller{
     return $msg;
   }
 
-  public function testing() {
-	  $msg = 'Testing';
-
-
-	  return $msg;
-
-  }
   public function motif(Request $request){
     $msg = $this->validateParam($request);
     if($msg != ''){
@@ -56,10 +49,11 @@ class ImageGeneratorController extends Controller{
     ini_set('max_execution_time', 1500);
 
     $sourceFolderPath = 'public/img_src/param_temp/before/';
+    $compressFolderPath = 'public/img_src/param_temp/temp_copied/';
+    $sourceFolderPath = 'public/img_src/param_temp/before/';
     $resultFolderPath = base_path('public\img_src\param_temp\after');
     $resultFileName = str_random(10);
     $sourceFileName = str_random(10);
-
     $matrix = $request->input('matrix');
     $color = $request->input('color');
     $image = $request->file('img_file');
@@ -67,10 +61,19 @@ class ImageGeneratorController extends Controller{
     $nama_file_save = $sourceFileName.$extension;
     $destinationPath = base_path('public\img_src\param_temp\before'); // upload path
     $image->move($destinationPath, $nama_file_save);
-
     $sourceFile = $destinationPath .'\\' . $nama_file_save;
-    $resultFile = $resultFolderPath .'\\'. $resultFileName.'.png';
+    $resultFile = $resultFolderPath .'\\'. $resultFileName.'.jpg';
 
+    // compress file
+    copy('public/img_src/param_temp/before/' . $nama_file_save, 'public/img_src/param_temp/temp_copied/' . $nama_file_save);
+    $compress_src = 'cd public/img_src/param_temp/before/ && magick convert -strip -quality 75% '. $nama_file_save . ' ' . $nama_file_save . ' & exit';
+
+    exec($compress_src, $res, $val);
+    if ($val != 0) {
+      return $this->errorReturn();
+    }
+
+    $sourceCompressFile = $compressFolderPath . $nama_file_save;
     $command = "cd matlab_file/Image_Quilting/ && matlab -wait -nosplash -nodesktop -nodisplay -noFigureWindows -r \"imgQuilting3('"
       .$sourceFile."', '"
       .$resultFile."', "
@@ -79,18 +82,18 @@ class ImageGeneratorController extends Controller{
 
     exec($command, $execResult, $retval);
     if($retval == 0){
-      $id = DB::table('generates')->insertGetId(['sourceFile' => $sourceFolderPath.$nama_file_save, 'generateFile' => $resultFile, 'nama_generate' => $resultFileName]);
+      $id = DB::table('generates')->insertGetId(['sourceFile' => $compressFolderPath.$nama_file_save, 'generateFile' => $resultFile, 'nama_generate' => $resultFileName]);
 
+      // return generated image in content type image
       $destinationPath = base_path('public\img_src\param_temp\after');
-      $sourceFile = $destinationPath .'\\' . $resultFileName.'.png';
+      $sourceFile = $destinationPath .'\\' . $resultFileName.'.jpg';
       $imagedata = file_get_contents($sourceFile);
       if(!$imagedata) return $this->errorReturn();
       $base64 = base64_encode($imagedata);
       $data = base64_decode($base64);
-      // imagepng($data, NULL, 9);
       //$image = imagecreatefromstring($data);
 
-      return response($data)->header('Content-Type','image/png');
+      return response($data)->header('Content-Type','image/jpg');
     }
     return $this->errorReturn();
   }

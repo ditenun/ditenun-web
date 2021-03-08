@@ -1,4 +1,4 @@
-function imgQuilting2 = example(SourceFile, newFileName, matrix, warna)
+function imgQuilting5 = example(SourceFile, newFileName, matrix, warna)
     %%display(SourceFile)
     %%display(newFileName)
 

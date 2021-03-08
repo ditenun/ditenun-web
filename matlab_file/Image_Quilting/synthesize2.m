@@ -75,7 +75,7 @@ for i=1:tilesize-overlap:sizeout(1)-tilesize+1,
       shared = imout(i:i+overlap-1,j:j+tilesize-1,:);
       err = errtop - 2 * getxcorr2(imin, shared) + sum(shared(:).^2);
 
-      % trim invalid data at edges, and off bottom where we don't want
+      % trim invalid data at edges, and off bottom where we dont want
       % tiles to go over the edge
       err = err(overlap:end-tilesize+1,tilesize:end-tilesize+1);
 
@@ -83,7 +83,7 @@ for i=1:tilesize-overlap:sizeout(1)-tilesize+1,
       shared = imout(i+overlap:i+tilesize-1,j:j+overlap-1,:);
       err2 = errsidesmall - 2 * getxcorr2(imin, shared) + sum(shared(:).^2);
       % sum(shared(:).^2); trim invalid data at edges, and where we
-      % don't want tiles to go over the edges
+      % dont want tiles to go over the edges
       err = err + err2(tilesize:end-tilesize+overlap+1, overlap:end-tilesize+1);
 
       [ibest, jbest] = find(err <= 1.1*1.01*min(err(:)));
