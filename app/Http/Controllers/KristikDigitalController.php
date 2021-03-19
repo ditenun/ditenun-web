@@ -6,6 +6,7 @@ use Illuminate\Support\Facades\DB;
 use App\Models\MotifTenun;
 use Illuminate\Support\Facades\Storage;
 use App\Models\Kristik;
+header("Content-type: image/jpeg");
 
 class KristikDigitalController extends Controller{
 
@@ -678,4 +679,45 @@ class KristikDigitalController extends Controller{
       return $im_dst;
       imagedestroy($im_dst);
     }
+
+    //simulation
+    public function greyScale(Request $request)
+    {
+      echo 'Grayscale image generated.';
+     // $image= $request->file('img_file');
+     // $imgcreate = imagecreatefrompng('public/img_src/bali_b.jpg');
+   //   imagepng($imgcreate,NULL,9);
+   //   if(imagefilter($imgcreate, IMG_FILTER_GRAYSCALE))
+   //   {
+   //       echo 'Grayscale image generated.';
+   //       // echo $imgcreate;
+   //       imagejpeg($imgcreate, 'public/2.jpg');
+   //   }
+   //   else
+   //   {
+   //       echo 'Grayscale conversion of image failed.';
+   //   }
+   //   imagedestroy($imgcreate);
+   // echo 'hallo';
+
+    //$this->edgeImage('public/sMsC5eil0l.png',10);
+    //$this->sharpenImage('public/img_src/bali_b.jpg',500,500);
+  }
+
+//  function sharpenImage($imagePath, $radius, $sigma) {
+//    $imagick = new \Imagick(realpath($imagePath));
+//    $imagick->sharpenimage($radius, $sigma);
+//    // $imagick->adaptiveSharpenImage($radius, $sigma);
+//    header("Content-Type: image/jpg");
+//    echo $imagick->getImageBlob();
+//
+// }
+//
+//
+//  function edgeImage($imagePath, $radius) {
+//    $imagick = new \Imagick(realpath($imagePath));
+//    $imagick->edgeImage($radius);
+//    header("Content-Type: image/jpg");
+//    echo $imagick->getImageBlob();
+//  }
 }

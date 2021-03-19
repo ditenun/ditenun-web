@@ -112,4 +112,6 @@ $app->get('listGenerate', 'GenerateController@getListGenerate');
 
 $app->post('ulosclassify', 'UlosController@ulosClassification');
 
+$app->get('grayscale','KristikDigitalController@greyScale');
+
 $app->get('{path:.*}', 'CustomController@stuff');
