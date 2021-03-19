@@ -18,7 +18,8 @@ class KristikDigitalController extends Controller{
   }
 
   private function validateParam(Request $request){
-    $square_size = 'square_size';
+    // $square_size = 'square_size';
+    $crosstichSize = 'cross_stitch_size';
     $color_amount = 'color_amount';
     $img_file = 'img_file';
     $msg = '';
@@ -39,11 +40,18 @@ class KristikDigitalController extends Controller{
         $min_dimen = round((int)$source_width/$source_height * $max_dimen);
       }
     }
-    if($request->input($square_size) == null || strval($request->input($square_size)) !== strval(intval($request->input($square_size))) || intval($request->input($square_size)) <= 0 || intval($request->input($square_size)) > $min_dimen){
+    // if($request->input($square_size) == null || strval($request->input($square_size)) !== strval(intval($request->input($square_size))) || intval($request->input($square_size)) <= 0 || intval($request->input($square_size)) > $min_dimen){
+    //   if($msg=='')
+    //     $msg .= $square_size;
+    //   else $msg .= ', '.$square_size;
+    // }
+
+    if($request->input($crosstichSize) == null){
       if($msg=='')
-        $msg .= $square_size;
-      else $msg .= ', '.$square_size;
+        $msg .= $crosstichSize;
+      else $msg .= ', '.$crosstichSize;
     }
+
     if($request->input($color_amount) == null || strval($request->input($color_amount)) !== strval(intval($request->input($color_amount))) || intval($request->input($color_amount)) <= 1){
       if($msg=='')
         $msg .= $color_amount;
@@ -97,11 +105,112 @@ class KristikDigitalController extends Controller{
     }
   }
 
+  private function sharedFunctionWeb(Request $request){
+    ini_set('max_execution_time', 1500);
+    // get param request
+    // $squareSize = $request->input('square_size');
+    $squareSize = 1;
+    $colorsAmount = $request->input('color_amount');
+    $crosstichSize = $request->input('cross_stitch_size');
+
+      $image = $request->file('img_file');
+      $extension = image_type_to_extension(getimagesize($image)[2]);
+      $nama_file = str_random(10);//$image->getClientOriginalName();
+      $nama_file_save = pathinfo($nama_file, PATHINFO_FILENAME) .$extension;
+      //$nama_motif = pathinfo($nama_file, PATHINFO_FILENAME);
+      $destinationPath = base_path('storage\app\kristik\param_temp\before'); // upload path
+      $image->move($destinationPath, $nama_file_save);
+      $sourceFile = $destinationPath .'\\' . $nama_file_save;
+
+    // get image
+    $imagedata = file_get_contents($sourceFile);
+    $base64 = base64_encode($imagedata);
+    $data = base64_decode($base64);
+    $source = imagecreatefromstring($data);
+
+    // get image size, create new size based on squareSize param
+    $source_width = imagesx($source);
+    $source_height = imagesy($source);
+    $this->optimizeResolution($source_width, $source_height, $squareSize);
+    // $newWidth = $source_width - $source_width%$squareSize;
+    // $newHeight = $source_height - $source_height%$squareSize;
+
+    $newWidth = $crosstichSize;
+    $newHeight = $crosstichSize;
+
+    // banyaknya kotak, semakin besar param square_size, semakin sedikit jumlah kotak. hasil juga semakin kecil karena ukuran hanya 1 pixel per kotak
+    // $squaresWidth = $newWidth/$squareSize;
+    // $squaresHeight = $newHeight/$squareSize;
+
+    $squaresWidth = $crosstichSize;
+    $squaresHeight = $crosstichSize;
+
+    $source_width = imagesx($source);
+    $source_height = imagesy($source);
+
+    // creating scaled copy of input image, truecolor = 24 bits per pixel
+    $sourceResized = imagecreatetruecolor($newWidth, $newHeight);
+    // making white background for images with transparency
+    $whiteBackground = imagecolorallocate($sourceResized, 255, 255, 255);
+    imagefill($sourceResized, 0, 0, $whiteBackground);
+    imagecopyresampled($sourceResized, $source, 0, 0, 0, 0, $newWidth, $newHeight, $source_width, $source_height);
+    imagedestroy($source); // release memory
+
+    $checkeredInput = imagecreatetruecolor($newWidth, $newHeight);
+    for($row = 0; $row<$squaresHeight; $row++) {
+    for($col = 0; $col<$squaresWidth; $col++) {
+      $square = @imagecreatetruecolor($squareSize, $squareSize);
+      imagecopyresized($square, $sourceResized, 0, 0, $col * $squareSize, $row * $squareSize, $squareSize, $squareSize, $squareSize, $squareSize);
+
+      $scaled = @imagecreatetruecolor(1,1);
+      imagecopyresampled($scaled, $square, 0, 0, 0, 0, 1, 1, $squareSize, $squareSize);
+      $meanColor = imagecolorat($scaled, 0, 0);
+      imagedestroy($scaled);
+
+      //filling checkeredInput
+      $square = @imagecreatetruecolor($squareSize, $squareSize);
+      imagefill($square, 0, 0, $meanColor);
+      imagecopymerge($checkeredInput, $square, $col * $squareSize, $row * $squareSize, 0, 0, $squareSize, $squareSize, 60);
+
+      imagedestroy($square);
+    }
+  }
+
+  ImageTrueColorToPalette($checkeredInput, false, $colorsAmount);
+  ImageColorMatch($sourceResized, $checkeredInput);//improving colors
+
+  imagedestroy($sourceResized);
+
+
+  //creating colors array
+  $colors = array();
+  for($row = 0; $row<$squaresHeight; $row++) {
+    for($col = 0; $col<$squaresWidth; $col++) {
+      $square = @imagecreatetruecolor($squareSize, $squareSize);
+      imagecopyresized($square, $checkeredInput, 0, 0, $col * $squareSize, $row * $squareSize, $squareSize, $squareSize, $squareSize, $squareSize);
+      $colors[] = imagecolorat($square, 0, 0);
+
+      imagedestroy($square);
+    }
+  }
+
+  imagedestroy($checkeredInput);
+    return [
+      'squaresWidth' => $squaresWidth,
+      'squaresHeight' => $squaresHeight,
+      'colors' => $colors,
+      'nama_file_save' => $nama_file_save
+    ];
+  }
+
+
+
   private function sharedFunction(Request $request){
     ini_set('max_execution_time', 1500);
     // get param request
     $squareSize = $request->input('square_size');
     $colorsAmount = $request->input('color_amount');
+
 
       $image = $request->file('img_file');
       $extension = image_type_to_extension(getimagesize($image)[2]);
@@ -357,14 +466,14 @@ class KristikDigitalController extends Controller{
         'message'=>$msg.' is not valid'
       ), 200);
     }
-        $res = $this->sharedFunction($request);
+        $res = $this->sharedFunctionWeb($request);
         $squaresWidth = $res['squaresWidth'];
         $squaresHeight = $res['squaresHeight'];
         $colors = $res['colors'];
         $nama_file_save = $res['nama_file_save'];
 
         //simulation of cross-stich
-        $simulationSquare = self::CROSS_STITCH;
+        $simulationSquare = 1;
         $simulation = imagecreatetruecolor($squaresWidth*$simulationSquare, $squaresHeight*$simulationSquare);
         $i=0;
         for($row = 0; $row<$squaresHeight; $row++) {
