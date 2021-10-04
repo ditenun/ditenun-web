@@ -70,16 +70,19 @@ class ImageGeneratorController extends Controller{
 
     $sourceFile = $destinationPath .'\\' . $nama_file_save;
     $resultFile = $resultFolderPath .'\\'. $resultFileName.'.png';
+    $filename = $resultFileName.'.png';
+    $random = rand(30,1000);
 
-    $command = "cd matlab_file/Image_Quilting/ && matlab -wait -nosplash -nodesktop -nodisplay -noFigureWindows -r \"imgQuilting3('"
+    $command = "cd matlab_file/Image_Quilting2/ && matlab -wait -nosplash -nodesktop -nodisplay -noFigureWindows -r \"imgQuilting3('"
       .$sourceFile."', '"
       .$resultFile."', "
       .$matrix."', "
+      .$random."'',"
       .$color.");exit; \"";
 
     exec($command, $execResult, $retval);
-    if($retval == 0){
-      $id = DB::table('generates')->insertGetId(['sourceFile' => $sourceFolderPath.$nama_file_save, 'generateFile' => $resultFile, 'nama_generate' => $resultFileName]);
+    // if($retval == 0){
+    //   $id = DB::table('generates')->insertGetId(['sourceFile' => $sourceFolderPath.$nama_file_save, 'generateFile' => $resultFile, 'nama_generate' => $resultFileName]);
 
       $destinationPath = base_path('public\img_src\param_temp\after');
       $sourceFile = $destinationPath .'\\' . $resultFileName.'.png';
@@ -91,8 +94,8 @@ class ImageGeneratorController extends Controller{
       //$image = imagecreatefromstring($data);
 
       return response($data)->header('Content-Type','image/png');
-    }
-    return $this->errorReturn();
+    // }
+   return $this->errorReturn();
   }
 
   private function errorReturn(){

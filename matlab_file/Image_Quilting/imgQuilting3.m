@@ -1,14 +1,14 @@
-function imgQuilting3 = example(SourceFile, newFileName, matrix, warna)
-
+function imgQuilting3 = example(SourceFile, newFileName, matrix,random, warna)
     %inisialisasi atribut
     texture = imread(SourceFile);
+    
     %The third dimension is the number of colour planes
     %correspond how much of a color to use (primary color it seems to be)
     [height, width, dim] = size(texture);
     inputan = matrix;
     temp_height=height;
     temp_width=width;
-
+    
     mod_panjang=mod(height,2);
     mod_lebar=mod(width,2);
     newSize = height;
@@ -36,7 +36,7 @@ function imgQuilting3 = example(SourceFile, newFileName, matrix, warna)
     i = 1;
     tic;
 
-    imgMirror_original = synthesize(ukuran_new, outsize, tilesize, overlapsize, isdebug);
+    imgMirror_original = synthesize(ukuran_new, outsize, tilesize, overlapsize, isdebug,random);
 
     if(inputan < 1)
       disp('Inputan matrix sebaiknya lebih dari 0!');
@@ -140,8 +140,12 @@ function imgQuilting3 = example(SourceFile, newFileName, matrix, warna)
     tilesize = tilesize + i;
 
     if(warna ~= 1)
-      imwrite(uint8(imgFullBerwarna),newFileName,'jpg')
+     imwrite(uint8(imgFullBerwarna), newFileName, 'Transparency', [0 0 0]);
+     %imwrite(uint8(imgFullBerwarna),newFileName,'jpg')
+    %  imwrite(uint8(imgFullBerwarna),newFileName,'png', 'Alpha', alpha2);
     else
-      imwrite(uint8(imgFullAsli),newFileName,'jpg')
+     imwrite(uint8(imgFullAsli), newFileName, 'Transparency', [0 0 0]);
+     %imwrite(uint8(imgFullAsli),newFileName,'jpg')
+      %imwrite(uint8(imgFullAsli),newFileName,'png', 'Alpha', alpha2);
     end
   end

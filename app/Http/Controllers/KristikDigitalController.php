@@ -111,7 +111,8 @@ class KristikDigitalController extends Controller{
     // $squareSize = $request->input('square_size');
     $squareSize = 1;
     $colorsAmount = $request->input('color_amount');
-    $crosstichSize = $request->input('cross_stitch_size');
+    $crosstich = $request->input('cross_stitch_size');
+    $crosstichSize = $crosstich * 4;
 
       $image = $request->file('img_file');
       $extension = image_type_to_extension(getimagesize($image)[2]);
@@ -136,14 +137,16 @@ class KristikDigitalController extends Controller{
     // $newHeight = $source_height - $source_height%$squareSize;
 
     $newWidth = $crosstichSize;
-    $newHeight = $crosstichSize;
+    // $newHeight = $crosstichSize;
+    $newHeight = ($source_height*($crosstich/$source_width))*4;
 
     // banyaknya kotak, semakin besar param square_size, semakin sedikit jumlah kotak. hasil juga semakin kecil karena ukuran hanya 1 pixel per kotak
     // $squaresWidth = $newWidth/$squareSize;
     // $squaresHeight = $newHeight/$squareSize;
 
     $squaresWidth = $crosstichSize;
-    $squaresHeight = $crosstichSize;
+    // $squaresHeight = $crosstichSize;
+    $squaresHeight = ($source_height*($crosstich/$source_width))*4;
 
     $source_width = imagesx($source);
     $source_height = imagesy($source);
@@ -151,7 +154,8 @@ class KristikDigitalController extends Controller{
     // creating scaled copy of input image, truecolor = 24 bits per pixel
     $sourceResized = imagecreatetruecolor($newWidth, $newHeight);
     // making white background for images with transparency
-    $whiteBackground = imagecolorallocate($sourceResized, 255, 255, 255);
+    $whiteBackground = imagecolorallocate($sourceResized, 57, 255, 20);
+    //$whiteBackground = imagecolorallocate($sourceResized, 255, 255, 255);
     imagefill($sourceResized, 0, 0, $whiteBackground);
     imagecopyresampled($sourceResized, $source, 0, 0, 0, 0, $newWidth, $newHeight, $source_width, $source_height);
     imagedestroy($source); // release memory
@@ -201,6 +205,161 @@ class KristikDigitalController extends Controller{
       'colors' => $colors,
       'nama_file_save' => $nama_file_save
     ];
+  }
+
+
+
+
+// Kebutuhan TA
+
+  private function sharedFunctionWebTA(Request $request){
+    ini_set('max_execution_time', 1500);
+    // get param request
+    // $squareSize = $request->input('square_size');
+    $squareSize = 1;
+    $colorsAmount = $request->input('color_amount');
+  //  $crosstich = $request->input('cross_stitch_size');
+    //$crosstichSize = $crosstich * 4;
+
+      $image = $request->file('img_file');
+      $extension = image_type_to_extension(getimagesize($image)[2]);
+      $nama_file = str_random(10);//$image->getClientOriginalName();
+      $nama_file_save = pathinfo($nama_file, PATHINFO_FILENAME) .$extension;
+      //$nama_motif = pathinfo($nama_file, PATHINFO_FILENAME);
+      $destinationPath = base_path('storage\app\kristik\param_temp\before'); // upload path
+      $image->move($destinationPath, $nama_file_save);
+      $sourceFile = $destinationPath .'\\' . $nama_file_save;
+
+    // get image
+    $imagedata = file_get_contents($sourceFile);
+    $base64 = base64_encode($imagedata);
+    $data = base64_decode($base64);
+    $source = imagecreatefromstring($data);
+
+    // get image size, create new size based on squareSize param
+    $source_width = imagesx($source);
+    $source_height = imagesy($source);
+    $this->optimizeResolution($source_width, $source_height, $squareSize);
+    // $newWidth = $source_width - $source_width%$squareSize;
+    // $newHeight = $source_height - $source_height%$squareSize;
+
+    $newWidth = 64;
+    $newHeight = 64;
+
+    // banyaknya kotak, semakin besar param square_size, semakin sedikit jumlah kotak. hasil juga semakin kecil karena ukuran hanya 1 pixel per kotak
+    // $squaresWidth = $newWidth/$squareSize;
+    // $squaresHeight = $newHeight/$squareSize;
+
+    $squaresWidth = 64;
+    $squaresHeight = 64;
+
+    $source_width = imagesx($source);
+    $source_height = imagesy($source);
+
+    // creating scaled copy of input image, truecolor = 24 bits per pixel
+    $sourceResized = imagecreatetruecolor($newWidth, $newHeight);
+    // making white background for images with transparency
+    $whiteBackground = imagecolorallocate($sourceResized, 57, 255, 20);
+    //$whiteBackground = imagecolorallocate($sourceResized, 255, 255, 255);
+    imagefill($sourceResized, 0, 0, $whiteBackground);
+    imagecopyresampled($sourceResized, $source, 0, 0, 0, 0, $newWidth, $newHeight, $source_width, $source_height);
+    imagedestroy($source); // release memory
+
+    $checkeredInput = imagecreatetruecolor($newWidth, $newHeight);
+    for($row = 0; $row<$squaresHeight; $row++) {
+    for($col = 0; $col<$squaresWidth; $col++) {
+      $square = @imagecreatetruecolor($squareSize, $squareSize);
+      imagecopyresized($square, $sourceResized, 0, 0, $col * $squareSize, $row * $squareSize, $squareSize, $squareSize, $squareSize, $squareSize);
+
+      $scaled = @imagecreatetruecolor(1,1);
+      imagecopyresampled($scaled, $square, 0, 0, 0, 0, 1, 1, $squareSize, $squareSize);
+      $meanColor = imagecolorat($scaled, 0, 0);
+      imagedestroy($scaled);
+
+      //filling checkeredInput
+      $square = @imagecreatetruecolor($squareSize, $squareSize);
+      imagefill($square, 0, 0, $meanColor);
+      imagecopymerge($checkeredInput, $square, $col * $squareSize, $row * $squareSize, 0, 0, $squareSize, $squareSize, 60);
+
+      imagedestroy($square);
+    }
+  }
+
+  ImageTrueColorToPalette($checkeredInput, false, $colorsAmount);
+  ImageColorMatch($sourceResized, $checkeredInput);//improving colors
+
+  imagedestroy($sourceResized);
+
+
+  //creating colors array
+  $colors = array();
+  for($row = 0; $row<$squaresHeight; $row++) {
+    for($col = 0; $col<$squaresWidth; $col++) {
+      $square = @imagecreatetruecolor($squareSize, $squareSize);
+      imagecopyresized($square, $checkeredInput, 0, 0, $col * $squareSize, $row * $squareSize, $squareSize, $squareSize, $squareSize, $squareSize);
+      $colors[] = imagecolorat($square, 0, 0);
+
+      imagedestroy($square);
+    }
+  }
+
+  imagedestroy($checkeredInput);
+    return [
+      'squaresWidth' => $squaresWidth,
+      'squaresHeight' => $squaresHeight,
+      'colors' => $colors,
+      'nama_file_save' => $nama_file_save
+    ];
+  }
+
+
+
+  // Kristiks remove Grid
+  public function kristiksTA(Request $request) {
+    $msg = $this->validateParam($request);
+    if($msg != ''){
+      return response()->json(array(
+        'message'=>$msg.' is not valid'
+      ), 200);
+    }
+        $res = $this->sharedFunctionWebTA($request);
+        $squaresWidth = $res['squaresWidth'];
+        $squaresHeight = $res['squaresHeight'];
+        $colors = $res['colors'];
+        $nama_file_save = $res['nama_file_save'];
+
+        //simulation of cross-stich
+        $simulationSquare = 8;
+        $simulation = imagecreatetruecolor($squaresWidth*$simulationSquare, $squaresHeight*$simulationSquare);
+        $i=0;
+        for($row = 0; $row<$squaresHeight; $row++) {
+          for($col = 0; $col<$squaresWidth; $col++) {
+            $r = ($colors[$i] >> 16) & 0xFF;
+            $g = ($colors[$i] >> 8) & 0xFF;
+            $b = $colors[$i] & 0xFF;
+
+            $square = @imagecreatetruecolor($simulationSquare, $simulationSquare);
+            //filling simulation
+            $square = $this->colorizeBasedOnAlphaChannnel(base_path('public/icons/square.png'), $r, $g, $b, $simulationSquare);
+            imagecopymerge($simulation, $square, $col * $simulationSquare, $row * $simulationSquare, 0, 0, $simulationSquare, $simulationSquare, 80);
+            imagedestroy($square);
+            $i++;
+          }
+        }
+
+        ob_start();
+        //from 0 (no compression) to 9
+        imagepng($simulation, NULL, 9);
+        $image_data = ob_get_contents();
+        $imageName = str_random(10).'.'.'png';
+        Storage::put('kristik/param_temp/after/'.$imageName, $image_data);
+        ob_end_clean();
+
+        $id = DB::table('kristiks')->insertGetId(
+            ['sourceFile' => 'storage/app/kristik/param_temp/before/'.$nama_file_save, 'kristikFile' => 'storage/app/kristik/param_temp/after/'.$imageName]
+        );
+        return response($image_data)->header('Content-Type','image/png');
+        imagedestroy($simulation);
   }
 
 
@@ -298,7 +457,7 @@ class KristikDigitalController extends Controller{
   private function sharedFunctionHP(Request $request){
     ini_set('max_execution_time', 1500);
     // get param request
-    $squareSize = $request->input('square_size');
+    $squareSize = $request->input('square_size') * 10;
     $colorsAmount = $request->input('color_amount');
 
       $image = $request->file('img_file');
@@ -412,12 +571,12 @@ class KristikDigitalController extends Controller{
   }
 
   public function kristiks(Request $request) {
-    $msg = $this->validateParam($request);
-    if($msg != ''){
-      return response()->json(array(
-        'message'=>$msg.' is not valid'
-      ), 200);
-    }
+    // $msg = $this->validateParam($request);
+    // if($msg != ''){
+    //   return response()->json(array(
+    //     'message'=>$msg.' is not valid'
+    //   ), 200);
+    // }
         $res = $this->sharedFunction($request);
         $squaresWidth = $res['squaresWidth'];
         $squaresHeight = $res['squaresHeight'];
