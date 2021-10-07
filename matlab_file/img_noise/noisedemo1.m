@@ -49,7 +49,7 @@ for ii=1:nfiles1  % loop for each file
    currentfilename = imagefiles1(ii).name;  
    currentimage = double(imread(['EDataBad\' currentfilename]));
    nlevel{ii} = NoiseLevel(currentimage);
-     fprintf(currentfilename+" ");
+     fprintf(currentfilename+'');
      fprintf(' : %f ',nlevel{ii});
      fprintf('\n');
 end

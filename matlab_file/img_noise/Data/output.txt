@@ -8,3 +8,26 @@ Error in <a href="matlab:matlab.internal.language.introspective.errorDocCallback
    currentimage = double(imread(['Data\' currentfilename]));
 } 
 noisedemo1
+{Error using <a href="matlab:matlab.internal.language.introspective.errorDocCallback('plus')" style="font-weight:bold"> + </a>
+Matrix dimensions must agree.
+
+Error in <a href="matlab:matlab.internal.language.introspective.errorDocCallback('noisedemo1', 'C:\xampp\htdocs\api\matlab_file\img_noise\noisedemo1.m', 52)" style="font-weight:bold">noisedemo1</a> (<a href="matlab: opentoline('C:\xampp\htdocs\api\matlab_file\img_noise\noisedemo1.m',52,0)">line 52</a>)
+     fprintf(currentfilename+'');
+} 
+3
+
+ans =
+
+     3
+
+4
+
+ans =
+
+     4
+
+main2_quilting
+Banyak Matrix(matrix * matrix) yang diinginkan = {Operation terminated by user during
+<a href="matlab:matlab.internal.language.introspective.errorDocCallback('main2_quilting', 'E:\GenerateMotifMatlab\main2_quilting.m', 11)" style="font-weight:bold">main2_quilting</a> (<a href="matlab: opentoline('E:\GenerateMotifMatlab\main2_quilting.m',11,0)">line 11</a>)
+
+} 

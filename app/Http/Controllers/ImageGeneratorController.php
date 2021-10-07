@@ -19,7 +19,7 @@ class ImageGeneratorController extends Controller{
     //$min_dimen = self::MAX_SIZE;
 
     // memory_limit=128M
-    if(!$request->hasFile($img_file) || !in_array(strtolower($request->file($img_file)->getClientOriginalExtension()), ['jpg', 'jpeg', 'png', 'tiff', 'gif', 'bmp'])/*|| number_format($request->file($img_file)->getSize() / 1048576, 2) > 2*/){
+    if(!$request->hasFile($img_file) || !in_array(strtolower($request->file($img_file)->getClientOriginalExtension()), ['jpg', 'jpeg', 'png'/*, 'tiff', 'gif', 'bmp'*/])/*|| number_format($request->file($img_file)->getSize() / 1048576, 2) > 2*/){
       if($msg=='')
         $msg .= $img_file;
       else $msg .= ', '.$img_file;
@@ -39,6 +39,13 @@ class ImageGeneratorController extends Controller{
     return $msg;
   }
 
+  public function testing() {
+	  $msg = 'Testing';
+
+
+	  return $msg;
+
+  }
   public function motif(Request $request){
     $msg = $this->validateParam($request);
     if($msg != ''){
@@ -48,44 +55,47 @@ class ImageGeneratorController extends Controller{
     }
     ini_set('max_execution_time', 1500);
 
-    $sourceFolderPath = 'public/img_src/param_temp/';
-    $resultFolderPath = 'public/img_temp/param_temp/';
-    $resultFileName = str_random(5);
+    $sourceFolderPath = 'public/img_src/param_temp/before/';
+    $resultFolderPath = base_path('public\img_src\param_temp\after');
+    $resultFileName = str_random(10);
+    $sourceFileName = str_random(10);
 
     $matrix = $request->input('matrix');
     $color = $request->input('color');
     $image = $request->file('img_file');
     $extension = image_type_to_extension(getimagesize($image)[2]);
-    $nama_file = $image->getClientOriginalName();
-    $nama_file_save = pathinfo($nama_file, PATHINFO_FILENAME) .$extension;
-    $nama_motif = pathinfo($nama_file, PATHINFO_FILENAME);
-    $destinationPath = base_path('public\img_src\param_temp'); // upload path
+    $nama_file_save = $sourceFileName.$extension;
+    $destinationPath = base_path('public\img_src\param_temp\before'); // upload path
     $image->move($destinationPath, $nama_file_save);
 
     $sourceFile = $destinationPath .'\\' . $nama_file_save;
-    $resultFile = $resultFolderPath . $resultFileName.'.jpg';
+    $resultFile = $resultFolderPath .'\\'. $resultFileName.'.png';
+    $filename = $resultFileName.'.png';
+    $random = rand(30,1000);
 
-    $command = "cd matlab_file/Image_Quilting/ && matlab -wait -nosplash -nodesktop -nodisplay -noFigureWindows -r \"imgQuilting3('"
+    $command = "cd matlab_file/Image_Quilting2/ && matlab -wait -nosplash -nodesktop -nodisplay -noFigureWindows -r \"imgQuilting3('"
       .$sourceFile."', '"
       .$resultFile."', "
       .$matrix."', "
+      .$random."'',"
       .$color.");exit; \"";
 
     exec($command, $execResult, $retval);
-    if($retval == 1){
-      $id = DB::table('generates')->insertGetId(['sourceFile' => $sourceFolderPath.$nama_file_save, 'generateFile' => $resultFile, 'nama_generate' => $resultFileName]);
+    // if($retval == 0){
+    //   $id = DB::table('generates')->insertGetId(['sourceFile' => $sourceFolderPath.$nama_file_save, 'generateFile' => $resultFile, 'nama_generate' => $resultFileName]);
 
-      $destinationPath = base_path('public\img_temp\param_temp');
-      $sourceFile = $destinationPath .'\\' . $nama_file_save;
-      $imagedata = @file_get_contents($sourceFile);
+      $destinationPath = base_path('public\img_src\param_temp\after');
+      $sourceFile = $destinationPath .'\\' . $resultFileName.'.png';
+      $imagedata = file_get_contents($sourceFile);
       if(!$imagedata) return $this->errorReturn();
       $base64 = base64_encode($imagedata);
       $data = base64_decode($base64);
-      $image = imagecreatefromstring($data);
+      // imagepng($data, NULL, 9);
+      //$image = imagecreatefromstring($data);
 
-      return response($image)->header('Content-Type','image/jpg');
-    }
-    return $this->errorReturn();
+      return response($data)->header('Content-Type','image/png');
+    // }
+   return $this->errorReturn();
   }
 
   private function errorReturn(){

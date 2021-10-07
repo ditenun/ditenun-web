@@ -4,7 +4,7 @@ if ~isdir(myFolder)
   uiwait(warndlg(errorMessage));
   return;
 end
-filePattern = fullfile(myFolder, '*.jpg');
+filePattern = fullfile(myFolder, '*.png');
 theFiles = dir(filePattern);
 
     inputan=input('Banyak Matrix(matrix * matrix) yang diinginkan = ');

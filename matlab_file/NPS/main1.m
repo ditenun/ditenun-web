@@ -4,7 +4,7 @@ if ~isdir(myFolder)
   uiwait(warndlg(errorMessage));
   return;
 end
-filePattern = fullfile(myFolder, '*.jpg');
+filePattern = fullfile(myFolder, '*.png');
 theFiles = dir(filePattern);
 
 square=input('Pilihan : \n1.Square\n2.Not Square Horizontal\n3.Not Square Vertical\nPilih = ');
